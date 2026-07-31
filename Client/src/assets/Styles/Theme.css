@@ -1,0 +1,30 @@
+:root {
+  /* Background */
+  --bg: #050505;
+  --surface: #0d0d0d;
+  --card: #141414;
+
+  /* Brand */
+  --primary: #22c55e;
+  --primary-hover: #16a34a;
+
+  /* Text */
+  --text: #ffffff;
+  --text-muted: #a1a1aa;
+
+  /* Border */
+  --border: #262626;
+
+  /* Status */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* Radius */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+
+  /* Shadows */
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
