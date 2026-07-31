@@ -1,11 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import DashboardLayout from "../Layouts/DashboardLayout";
+import DashboardLayout from "../layouts/DashboardLayout";
 
-import Dashboard from "../Pages/Dashboard";
-import Transactions from "../Pages/Transactions";
-import Analytics from "../Pages/Analytics";
-import Settings from "../Pages/Settings";
+import Dashboard from "../pages/Dashboard";
+import Transactions from "../pages/Transactions";
+import Analytics from "../pages/Analytics";
+import Settings from "../pages/Settings";
 
 const router = createBrowserRouter([
   {
