@@ -38,8 +38,9 @@ w-72
 h-screen
 border-r
 border-white/10
-bg-white/5
-backdrop-blur-xl
+bg-white/4
+backdrop-blur-2xl
+shadow-[10px_0_40px_rgba(0,0,0,0.25)]
 p-6
 flex
 flex-col

@@ -40,7 +40,7 @@ const data = [
 
 const FinanceChart = () => {
   return (
-    <Card className="h-[380px]">
+    <Card className="h-95">
       <div className="mb-6">
         <h3 className="text-lg font-semibold">Financial Overview</h3>
 
