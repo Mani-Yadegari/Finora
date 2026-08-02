@@ -7,34 +7,63 @@ const DashboardLayout = () => {
   return (
     <div
       className="
-      min-h-screen
-      bg-[var(--bg)]
-      relative
-      overflow-hidden
-    "
+        relative
+        h-screen
+        overflow-hidden
+        bg-[var(--bg)]
+      "
     >
-      {/* Green Glow */}
+      {/* Left Glow */}
       <div
         className="
           absolute
           -top-40
           -left-40
-          w-96
           h-96
-          bg-green-500/20
+          w-96
           rounded-full
+          bg-green-500/20
           blur-[120px]
           pointer-events-none
         "
       />
 
-      <div className="flex min-h-screen relative z-10">
+      {/* Right Glow */}
+      <div
+        className="
+          absolute
+          bottom-0
+          right-0
+          h-[500px]
+          w-[500px]
+          rounded-full
+          bg-emerald-500/10
+          blur-[180px]
+          pointer-events-none
+        "
+      />
+
+      <div className="relative z-10 flex h-full">
         <Sidebar />
 
-        <main className="flex-1">
+        <main
+          className="
+    flex
+    flex-1
+    flex-col
+    overflow-hidden
+  "
+        >
           <Topbar />
 
-          <section className="p-8">
+          <section
+            className="
+    flex-1
+    overflow-y-auto
+    pt-4
+    px-4
+  "
+          >
             <Outlet />
           </section>
         </main>

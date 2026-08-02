@@ -6,12 +6,6 @@ import RecentTransactions from "../components/dashboard/RecentTransactions";
 const Dashboard = () => {
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-semibold">Good morning, Mani 👋</h2>
-
-        <p className="text-zinc-400 mt-2">Here's your financial overview</p>
-      </div>
-
       <BalanceCard />
 
       <div

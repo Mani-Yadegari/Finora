@@ -7,8 +7,6 @@ import {
 
 import { NavLink } from "react-router-dom";
 
-import Logo from "./Logo";
-
 const Sidebar = () => {
   const menuItems = [
     {
@@ -47,9 +45,7 @@ flex
 flex-col
 "
     >
-      <Logo />
-
-      <nav className="mt-10 space-y-2">
+      <nav className="mt-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
 

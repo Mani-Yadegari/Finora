@@ -32,3 +32,10 @@ ul,
 ol {
   list-style: none;
 }
+button {
+  cursor: pointer;
+}
+input,
+textarea {
+  outline: none;
+}

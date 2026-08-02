@@ -1,6 +1,6 @@
 :root {
   /* Background */
-  --bg: #050505;
+  --bg: #0a0a0a;
   --surface: #0d0d0d;
   --card: #141414;
 
@@ -13,7 +13,7 @@
   --text-muted: #a1a1aa;
 
   /* Border */
-  --border: #262626;
+  --border: rgba(255, 255, 255, 0.08);
 
   /* Status */
   --success: #22c55e;
@@ -27,4 +27,5 @@
 
   /* Shadows */
   --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 40px rgba(34, 197, 94, 0.15);
 }
