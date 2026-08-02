@@ -18,7 +18,7 @@ const transactions = [
   },
 ];
 
-const RecentTransactions = () => {
+const SavingChart = () => {
   return (
     <Card>
       <div className="mb-6">
@@ -58,4 +58,4 @@ const RecentTransactions = () => {
   );
 };
 
-export default RecentTransactions;
+export default SavingChart;
