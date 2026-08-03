@@ -80,7 +80,7 @@ const DashboardLayout = () => {
             className="
               flex-1
               overflow-y-auto
-              py-4
+              py-2
               px-4
             "
           >

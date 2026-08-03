@@ -29,33 +29,53 @@ const StatCard = ({
 
   const isNegative = changeValue < 0;
 
-  const changeColor =
-    type === "expense"
-      ? isNegative
-        ? "text-green-400"
-        : "text-red-400"
-      : isNegative
-        ? "text-red-400"
-        : "text-green-400";
+  // آیا این تغییر خوب است؟
+  const isPositiveChange = type === "expense" ? isNegative : !isNegative;
+
+  const changeColor = isPositiveChange ? "text-green-400" : "text-red-400";
+
+  const changeBg = isPositiveChange ? "bg-green-500/10" : "bg-red-500/10";
 
   const TrendIcon = isNegative ? ArrowDownRight : ArrowUpRight;
+
+  const glowColor = type === "expense" ? "bg-red-400/5" : "bg-green-400/5";
 
   return (
     <Card
       className="
+        relative
+        overflow-hidden
         flex
         items-center
         gap-5
+        min-h-[150px]
         transition-all
         duration-300
         hover:-translate-y-1
+        hover:shadow-[0_20px_40px_rgba(0,0,0,0.25)]
       "
     >
+      {/* Glow */}
       <div
         className={`
-          w-[72px]
-          h-[72px]
-          rounded-3xl
+          absolute
+          -right-10
+          -bottom-10
+          w-32
+          h-32
+          rounded-full
+          ${glowColor}
+          blur-3xl
+        `}
+      />
+
+      {/* Icon */}
+      <div
+        className={`
+          relative
+          w-16
+          h-16
+          rounded-2xl
           ${iconBg}
           ${iconColor}
           flex
@@ -68,28 +88,54 @@ const StatCard = ({
           shrink-0
         `}
       >
-        <Icon size={30} strokeWidth={2.2} />
+        <Icon size={27} strokeWidth={2.2} />
       </div>
 
-      <div className="flex flex-col flex-1">
-        <p className="text-sm text-zinc-400">{title}</p>
-
-        <h3 className="text-3xl font-semibold tracking-tight mt-1">{value}</h3>
-
+      {/* Content */}
+      <div className="relative flex flex-col">
         <p
+          className="
+            text-sm
+            text-zinc-400
+          "
+        >
+          {title}
+        </p>
+
+        <h3
+          className="
+            text-3xl
+            font-semibold
+            tracking-tight
+            mt-1
+          "
+        >
+          {value}
+        </h3>
+
+        {/* Change Badge */}
+        <div
           className={`
             flex
             items-center
             gap-1
-            text-sm
+            w-fit
+            mt-3
+            px-2.5
+            py-1
+            rounded-full
+            text-xs
             font-medium
-            mt-2
             ${changeColor}
+            ${changeBg}
+            border
+            border-white/10
           `}
         >
           {change}
-          <TrendIcon size={16} strokeWidth={2.5} />
-        </p>
+
+          <TrendIcon size={14} strokeWidth={2.5} />
+        </div>
       </div>
     </Card>
   );

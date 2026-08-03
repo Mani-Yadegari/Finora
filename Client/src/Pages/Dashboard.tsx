@@ -13,7 +13,7 @@ const Dashboard = () => {
         className="
     grid
     grid-cols-1
-    xl:grid-cols-[2.6fr_1fr]
+    xl:grid-cols-[2.7fr_1fr]
     gap-6
   "
       >

@@ -1,4 +1,4 @@
-import { Target, Sparkle } from "lucide-react";
+import { WalletCards, Sparkle } from "lucide-react";
 import Card from "../ui/Card";
 
 const SavingChart = () => {
@@ -97,49 +97,50 @@ const SavingChart = () => {
             "
           />
 
-          <Target size={22} strokeWidth={2} className="relative z-10" />
+          <WalletCards size={22} strokeWidth={2} className="relative z-10" />
         </div>
       </div>
 
       {/* Circular Chart */}
       <div
         className="
-          relative
-          flex
-          justify-center
-          items-center
-          mt-5
-        "
+    relative
+    flex
+    items-center
+    justify-center
+    mt-4
+    h-[190px]
+  "
       >
         {/* Chart Glow */}
         <div
           className="
-            absolute
-            w-48
-            h-48
-            rounded-full
-            bg-green-400/15
-            blur-3xl
-          "
+      absolute
+      w-52
+      h-52
+      rounded-full
+      bg-green-400/15
+      blur-3xl
+    "
         />
 
         <svg
           className="
-            relative
-            w-48
-            h-48
-            -rotate-90
-          "
+      absolute
+      w-52
+      h-52
+      -rotate-90
+    "
           viewBox="0 0 120 120"
         >
-          {/* Empty Ring */}
+          {/* Background Ring */}
           <circle
             cx="60"
             cy="60"
             r="52"
             fill="none"
             stroke="rgba(255,255,255,0.06)"
-            strokeWidth="7"
+            strokeWidth="8"
           />
 
           {/* Progress Ring */}
@@ -149,43 +150,21 @@ const SavingChart = () => {
             r="52"
             fill="none"
             stroke="#4ade80"
-            strokeWidth="7"
+            strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={`${savingPercent * 3.27} 327`}
           />
         </svg>
 
         {/* Center */}
-        <div
-          className="
-            absolute
-            inset-0
-            flex
-            items-center
-            justify-center
-          "
-        >
-          <div className="text-center">
-            <h2
-              className="
-                text-3xl
-                font-semibold
-                tracking-tight
-              "
-            >
-              {savingPercent}%
-            </h2>
+        <div className="absolute flex flex-col items-center justify-center">
+          <h2 className="text-[34px] font-bold tracking-tight leading-none">
+            {savingPercent}%
+          </h2>
 
-            <p
-              className="
-                text-xs
-                text-zinc-400
-                mt-1
-              "
-            >
-              of {targetAmount}
-            </p>
-          </div>
+          <p className="mt-2 text-xs uppercase tracking-wider text-zinc-500">
+            of {targetAmount}
+          </p>
         </div>
       </div>
 
