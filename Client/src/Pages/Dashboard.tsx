@@ -1,7 +1,7 @@
 import BalanceCard from "../components/dashboard/BalanceCard";
 import StatCard from "../components/dashboard/StatCard";
 import FinanceChart from "../components/dashboard/FinanceChart";
-import RecentTransactions from "../components/dashboard/SavingChart";
+import SavingChart from "../components/dashboard/SavingChart";
 import { Wallet, ArrowDown, ChartPie } from "lucide-react";
 
 const Dashboard = () => {
@@ -11,17 +11,15 @@ const Dashboard = () => {
 
       <div
         className="
-          grid
-          grid-cols-1
-          xl:grid-cols-3
-          gap-6
-        "
+    grid
+    grid-cols-1
+    xl:grid-cols-[2.6fr_1fr]
+    gap-6
+  "
       >
-        <div className="xl:col-span-2">
-          <FinanceChart />
-        </div>
+        <FinanceChart />
 
-        <RecentTransactions />
+        <SavingChart />
       </div>
 
       <div
