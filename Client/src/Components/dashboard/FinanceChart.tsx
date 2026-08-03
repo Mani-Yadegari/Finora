@@ -194,9 +194,9 @@ const FinanceChart = () => {
               borderRadius: "14px",
               color: "#fff",
             }}
-            formatter={(value: number, name: string) => [
-              `$${value.toLocaleString()}`,
-              name.charAt(0).toUpperCase() + name.slice(1),
+            formatter={(value, name) => [
+              `$${Number(value).toLocaleString()}`,
+              String(name).charAt(0).toUpperCase() + String(name).slice(1),
             ]}
           />
 
