@@ -3,7 +3,7 @@ import StatCard from "../components/dashboard/StatCard";
 import FinanceChart from "../components/dashboard/FinanceChart";
 import SavingChart from "../components/dashboard/SavingChart";
 
-import { Wallet, ArrowDown, ArrowLeftRight } from "lucide-react";
+import { Wallet, ReceiptText, ArrowLeftRight } from "lucide-react";
 
 const Dashboard = () => {
   return (
@@ -44,7 +44,7 @@ const Dashboard = () => {
 
         {/* Expense */}
         <StatCard
-          icon={ArrowDown}
+          icon={ReceiptText}
           title="Monthly Expense"
           value="$2,340"
           change="-4.5%"
