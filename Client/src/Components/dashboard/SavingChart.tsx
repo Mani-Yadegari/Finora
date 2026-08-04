@@ -1,12 +1,18 @@
+import { motion } from "framer-motion";
 import { WalletCards, Sparkle } from "lucide-react";
+
 import Card from "../ui/Card";
+import AnimatedNumber from "../ui/AnimatedNumber";
 
 const SavingChart = () => {
   const savingPercent = 72;
 
-  const targetAmount = "$30,000";
-  const savedAmount = "$21,600";
-  const remainingAmount = "$8,400";
+  const targetAmount = 30000;
+  const savedAmount = 21600;
+  const remainingAmount = 8400;
+
+  const circumference = 327;
+  const progress = (savingPercent / 100) * circumference;
 
   return (
     <Card
@@ -112,6 +118,7 @@ const SavingChart = () => {
           "
           viewBox="0 0 120 120"
         >
+          {/* Background Circle */}
           <circle
             cx="60"
             cy="60"
@@ -121,7 +128,8 @@ const SavingChart = () => {
             strokeWidth="8"
           />
 
-          <circle
+          {/* Animated Circle */}
+          <motion.circle
             cx="60"
             cy="60"
             r="52"
@@ -129,21 +137,56 @@ const SavingChart = () => {
             stroke="#4ade80"
             strokeWidth="8"
             strokeLinecap="round"
-            strokeDasharray={`${savingPercent * 3.27} 327`}
+            strokeDasharray={circumference}
+            initial={{
+              strokeDashoffset: circumference,
+            }}
+            animate={{
+              strokeDashoffset: circumference - progress,
+            }}
+            transition={{
+              duration: 1.4,
+              ease: "easeOut",
+            }}
           />
         </svg>
 
+        {/* Center */}
         <div className="absolute flex flex-col items-center">
-          <h2 className="text-[34px] font-bold leading-none">
-            {savingPercent}%
+          <h2
+            className="
+              text-[34px]
+              font-bold
+              leading-none
+            "
+          >
+            <AnimatedNumber
+              value={savingPercent}
+              suffix="%"
+              decimals={0}
+              delay={0.2}
+            />
           </h2>
 
           <p className="mt-2 text-sm font-medium text-zinc-300">
-            {savedAmount}
+            <AnimatedNumber
+              value={savedAmount}
+              prefix="$"
+              decimals={0}
+              delay={0.4}
+            />
           </p>
 
-          <p className="text-xs uppercase tracking-wider text-zinc-500 mt-1">
-            of {targetAmount}
+          <p
+            className="
+              text-xs
+              uppercase
+              tracking-wider
+              text-zinc-500
+              mt-1
+            "
+          >
+            of ${targetAmount.toLocaleString()}
           </p>
         </div>
       </div>
@@ -165,7 +208,14 @@ const SavingChart = () => {
         </h3>
 
         <p className="text-sm text-zinc-400 mt-2">
-          {remainingAmount} remaining
+          <AnimatedNumber
+            value={remainingAmount}
+            startValue={targetAmount}
+            prefix="$"
+            decimals={0}
+            delay={0.1}
+          />{" "}
+          remaining
         </p>
 
         <p className="text-xs text-zinc-500 mt-1">

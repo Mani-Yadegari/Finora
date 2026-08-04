@@ -4,31 +4,37 @@ import { useEffect, useState } from "react";
 interface AnimatedNumberProps {
   value: number;
   duration?: number;
+  delay?: number;
   prefix?: string;
   suffix?: string;
   decimals?: number;
+  startValue?: number;
 }
 
 const AnimatedNumber = ({
   value,
   duration = 1.2,
+  delay = 0,
   prefix = "",
   suffix = "",
   decimals = 2,
+  startValue = 0,
 }: AnimatedNumberProps) => {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(startValue);
 
   useEffect(() => {
-    const controls = animate(0, value, {
+    const controls = animate(startValue, value, {
       duration,
+      delay,
       ease: "easeOut",
+
       onUpdate(latest) {
         setCount(latest);
       },
     });
 
     return () => controls.stop();
-  }, [value, duration]);
+  }, [value, duration, delay, startValue]);
 
   return (
     <>
