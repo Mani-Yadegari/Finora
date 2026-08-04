@@ -2,7 +2,8 @@ import BalanceCard from "../components/dashboard/BalanceCard";
 import StatCard from "../components/dashboard/StatCard";
 import FinanceChart from "../components/dashboard/FinanceChart";
 import SavingChart from "../components/dashboard/SavingChart";
-import { Wallet, ArrowDown, ChartPie } from "lucide-react";
+
+import { Wallet, ArrowDown, ArrowLeftRight } from "lucide-react";
 
 const Dashboard = () => {
   return (
@@ -11,11 +12,11 @@ const Dashboard = () => {
 
       <div
         className="
-    grid
-    grid-cols-1
-    xl:grid-cols-[2.7fr_1fr]
-    gap-6
-  "
+          grid
+          grid-cols-1
+          xl:grid-cols-[2.7fr_1fr]
+          gap-6
+        "
       >
         <FinanceChart />
 
@@ -52,15 +53,15 @@ const Dashboard = () => {
           iconBg="bg-red-500/10"
         />
 
-        {/* Saving Rate */}
+        {/* Cash Flow */}
         <StatCard
-          icon={ChartPie}
-          title="Saving Rate"
-          value="72%"
-          change="+3.1%"
-          type="balance"
-          iconColor="text-blue-400"
-          iconBg="bg-blue-500/10"
+          icon={ArrowLeftRight}
+          title="Cash Flow"
+          value="$10,200"
+          change="+18.3%"
+          type="cashflow"
+          iconColor="text-cyan-400"
+          iconBg="bg-cyan-500/10"
         />
       </div>
     </div>

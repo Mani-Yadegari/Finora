@@ -8,7 +8,7 @@ type Props = {
   value: string;
   change: string;
 
-  type?: "expense" | "income" | "balance" | "investment";
+  type?: "income" | "expense" | "balance" | "investment" | "cashflow";
 
   iconColor?: string;
   iconBg?: string;
@@ -19,9 +19,7 @@ const StatCard = ({
   title,
   value,
   change,
-
   type = "income",
-
   iconColor = "text-green-400",
   iconBg = "bg-green-500/10",
 }: Props) => {
@@ -29,7 +27,7 @@ const StatCard = ({
 
   const isNegative = changeValue < 0;
 
-  // آیا این تغییر خوب است؟
+  // Expense کاهشش خوبه، بقیه افزایشش خوبه
   const isPositiveChange = type === "expense" ? isNegative : !isNegative;
 
   const changeColor = isPositiveChange ? "text-green-400" : "text-red-400";
@@ -93,21 +91,14 @@ const StatCard = ({
 
       {/* Content */}
       <div className="relative flex flex-col">
-        <p
-          className="
-            text-sm
-            text-zinc-400
-          "
-        >
-          {title}
-        </p>
+        <p className="text-sm text-zinc-400">{title}</p>
 
         <h3
           className="
+            mt-1
             text-3xl
             font-semibold
             tracking-tight
-            mt-1
           "
         >
           {value}
@@ -116,20 +107,20 @@ const StatCard = ({
         {/* Change Badge */}
         <div
           className={`
+            mt-3
             flex
+            w-fit
             items-center
             gap-1
-            w-fit
-            mt-3
+            rounded-full
+            border
+            border-white/10
             px-2.5
             py-1
-            rounded-full
             text-xs
             font-medium
             ${changeColor}
             ${changeBg}
-            border
-            border-white/10
           `}
         >
           {change}
