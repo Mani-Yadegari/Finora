@@ -3,7 +3,10 @@ import Card from "../ui/Card";
 
 const SavingChart = () => {
   const savingPercent = 72;
+
   const targetAmount = "$30,000";
+  const savedAmount = "$21,600";
+  const remainingAmount = "$8,400";
 
   return (
     <Card
@@ -47,29 +50,13 @@ const SavingChart = () => {
       {/* Header */}
       <div className="relative flex items-center justify-between">
         <div>
-          <p
-            className="
-              text-xs
-              uppercase
-              tracking-wider
-              text-zinc-500
-            "
-          >
-            Monthly Goal
+          <p className="text-xs uppercase tracking-wider text-zinc-500">
+            Financial Goal
           </p>
 
-          <h3
-            className="
-              text-lg
-              font-semibold
-              mt-1
-            "
-          >
-            Saving Progress
-          </h3>
+          <h3 className="text-lg font-semibold mt-1">Dream Vacation</h3>
         </div>
 
-        {/* Icon */}
         <div
           className="
             relative
@@ -88,52 +75,43 @@ const SavingChart = () => {
             overflow-hidden
           "
         >
-          <div
-            className="
-              absolute
-              inset-0
-              bg-green-400/10
-              blur-xl
-            "
-          />
+          <div className="absolute inset-0 bg-green-400/10 blur-xl" />
 
           <WalletCards size={22} strokeWidth={2} className="relative z-10" />
         </div>
       </div>
 
-      {/* Circular Chart */}
+      {/* Circular Progress */}
       <div
         className="
-    relative
-    flex
-    items-center
-    justify-center
-    mt-4
-    h-[190px]
-  "
+          relative
+          flex
+          items-center
+          justify-center
+          mt-5
+          h-[190px]
+        "
       >
-        {/* Chart Glow */}
         <div
           className="
-      absolute
-      w-52
-      h-52
-      rounded-full
-      bg-green-400/15
-      blur-3xl
-    "
+            absolute
+            w-52
+            h-52
+            rounded-full
+            bg-green-400/15
+            blur-3xl
+          "
         />
 
         <svg
           className="
-      absolute
-      w-52
-      h-52
-      -rotate-90
-    "
+            absolute
+            w-52
+            h-52
+            -rotate-90
+          "
           viewBox="0 0 120 120"
         >
-          {/* Background Ring */}
           <circle
             cx="60"
             cy="60"
@@ -143,7 +121,6 @@ const SavingChart = () => {
             strokeWidth="8"
           />
 
-          {/* Progress Ring */}
           <circle
             cx="60"
             cy="60"
@@ -156,48 +133,43 @@ const SavingChart = () => {
           />
         </svg>
 
-        {/* Center */}
-        <div className="absolute flex flex-col items-center justify-center">
-          <h2 className="text-[34px] font-bold tracking-tight leading-none">
+        <div className="absolute flex flex-col items-center">
+          <h2 className="text-[34px] font-bold leading-none">
             {savingPercent}%
           </h2>
 
-          <p className="mt-2 text-xs uppercase tracking-wider text-zinc-500">
+          <p className="mt-2 text-sm font-medium text-zinc-300">
+            {savedAmount}
+          </p>
+
+          <p className="text-xs uppercase tracking-wider text-zinc-500 mt-1">
             of {targetAmount}
           </p>
         </div>
       </div>
 
-      {/* Status */}
-      <div
-        className="
-          relative
-          text-center
-          mt-3
-        "
-      >
+      {/* Footer */}
+      <div className="relative text-center mt-2">
         <h3
           className="
             text-base
             font-semibold
             flex
-            justify-center
             items-center
+            justify-center
             gap-2
           "
         >
-          You're doing great!
+          You're on track
           <Sparkle size={15} className="text-green-300" />
         </h3>
 
-        <p
-          className="
-            text-sm
-            text-zinc-400
-            mt-1
-          "
-        >
-          Keep going, you're almost there.
+        <p className="text-sm text-zinc-400 mt-2">
+          {remainingAmount} remaining
+        </p>
+
+        <p className="text-xs text-zinc-500 mt-1">
+          Estimated completion • Oct 2026
         </p>
       </div>
     </Card>
