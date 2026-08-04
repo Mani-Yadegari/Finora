@@ -1,5 +1,6 @@
 import { Landmark, TrendingUp } from "lucide-react";
 import Card from "../ui/Card";
+import AnimatedNumber from "../ui/AnimatedNumber";
 
 const BalanceCard = () => {
   return (
@@ -52,13 +53,13 @@ const BalanceCard = () => {
 
           <h2
             className="
-              text-4xl
-              font-semibold
-              tracking-tight
-              mt-1
-            "
+    text-4xl
+    font-semibold
+    tracking-tight
+    mt-1
+  "
           >
-            $24,580.00
+            <AnimatedNumber value={24580} prefix="$" />
           </h2>
         </div>
 

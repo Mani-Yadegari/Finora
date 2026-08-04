@@ -35,7 +35,7 @@ const Dashboard = () => {
         <StatCard
           icon={Wallet}
           title="Monthly Income"
-          value="$12,540"
+          value={12540}
           change="+12.5%"
           type="income"
           iconColor="text-green-400"
@@ -46,7 +46,7 @@ const Dashboard = () => {
         <StatCard
           icon={ReceiptText}
           title="Monthly Expense"
-          value="$2,340"
+          value={12540}
           change="-4.5%"
           type="expense"
           iconColor="text-red-400"
@@ -57,7 +57,7 @@ const Dashboard = () => {
         <StatCard
           icon={ArrowLeftRight}
           title="Cash Flow"
-          value="$10,200"
+          value={12540}
           change="+18.3%"
           type="cashflow"
           iconColor="text-cyan-400"

@@ -1,11 +1,13 @@
 import Card from "../ui/Card";
+import AnimatedNumber from "../ui/AnimatedNumber";
+
 import type { LucideIcon } from "lucide-react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 type Props = {
   icon: LucideIcon;
   title: string;
-  value: string;
+  value: number;
   change: string;
 
   type?: "income" | "expense" | "balance" | "investment" | "cashflow";
@@ -27,7 +29,8 @@ const StatCard = ({
 
   const isNegative = changeValue < 0;
 
-  // Expense کاهشش خوبه، بقیه افزایشش خوبه
+  // Expense: کاهش هزینه مثبت است
+  // بقیه: افزایش مثبت است
   const isPositiveChange = type === "expense" ? isNegative : !isNegative;
 
   const changeColor = isPositiveChange ? "text-green-400" : "text-red-400";
@@ -101,7 +104,7 @@ const StatCard = ({
             tracking-tight
           "
         >
-          {value}
+          <AnimatedNumber value={value} prefix="$" decimals={0} />
         </h3>
 
         {/* Change Badge */}
