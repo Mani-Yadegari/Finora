@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { WalletCards, Sparkle } from "lucide-react";
+import { Plane, Sparkle } from "lucide-react";
 
 import GoalMenu from "./GoalMenu";
 import Card from "../ui/Card";
@@ -100,7 +100,7 @@ const SavingChart = () => {
               "
             />
 
-            <WalletCards size={22} strokeWidth={2} className="relative z-10" />
+            <Plane size={22} strokeWidth={2} className="relative z-10" />
           </div>
 
           {/* Goal Options */}
