@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { WalletCards, Sparkle } from "lucide-react";
 
+import GoalMenu from "./GoalMenu";
 import Card from "../ui/Card";
 import AnimatedNumber from "../ui/AnimatedNumber";
 
@@ -56,34 +57,54 @@ const SavingChart = () => {
       {/* Header */}
       <div className="relative flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wider text-zinc-500">
+          <p
+            className="
+              text-xs
+              uppercase
+              tracking-wider
+              text-zinc-500
+            "
+          >
             Financial Goal
           </p>
 
-          <h3 className="text-lg font-semibold mt-1">Dream Vacation</h3>
+          <h3 className="mt-1 text-lg font-semibold">Dream Vacation</h3>
         </div>
 
-        <div
-          className="
-            relative
-            w-11
-            h-11
-            rounded-2xl
-            bg-green-500/10
-            text-green-400
-            flex
-            items-center
-            justify-center
-            border
-            border-green-400/20
-            backdrop-blur-xl
-            shadow-[0_0_25px_rgba(34,197,94,0.15)]
-            overflow-hidden
-          "
-        >
-          <div className="absolute inset-0 bg-green-400/10 blur-xl" />
+        <div className="flex items-center gap-2">
+          {/* Goal Icon */}
+          <div
+            className="
+              relative
+              flex
+              h-11
+              w-11
+              items-center
+              justify-center
+              overflow-hidden
+              rounded-2xl
+              border
+              border-green-400/20
+              bg-green-500/10
+              text-green-400
+              backdrop-blur-xl
+              shadow-[0_0_25px_rgba(34,197,94,0.15)]
+            "
+          >
+            <div
+              className="
+                absolute
+                inset-0
+                bg-green-400/10
+                blur-xl
+              "
+            />
 
-          <WalletCards size={22} strokeWidth={2} className="relative z-10" />
+            <WalletCards size={22} strokeWidth={2} className="relative z-10" />
+          </div>
+
+          {/* Goal Options */}
+          <GoalMenu />
         </div>
       </div>
 
@@ -98,6 +119,7 @@ const SavingChart = () => {
           h-[190px]
         "
       >
+        {/* Ring Glow */}
         <div
           className="
             absolute
@@ -118,7 +140,7 @@ const SavingChart = () => {
           "
           viewBox="0 0 120 120"
         >
-          {/* Background Circle */}
+          {/* Background Ring */}
           <circle
             cx="60"
             cy="60"
@@ -128,7 +150,7 @@ const SavingChart = () => {
             strokeWidth="8"
           />
 
-          {/* Glow Circle */}
+          {/* Glow Ring */}
           <motion.circle
             cx="60"
             cy="60"
@@ -152,7 +174,7 @@ const SavingChart = () => {
             }}
           />
 
-          {/* Main Circle */}
+          {/* Main Ring */}
           <motion.circle
             cx="60"
             cy="60"
@@ -175,7 +197,7 @@ const SavingChart = () => {
           />
         </svg>
 
-        {/* Center */}
+        {/* Center Content */}
         <div className="absolute flex flex-col items-center">
           <h2
             className="
@@ -192,7 +214,14 @@ const SavingChart = () => {
             />
           </h2>
 
-          <p className="mt-2 text-sm font-medium text-zinc-300">
+          <p
+            className="
+              mt-2
+              text-sm
+              font-medium
+              text-zinc-300
+            "
+          >
             <AnimatedNumber
               value={savedAmount}
               prefix="$"
@@ -203,11 +232,11 @@ const SavingChart = () => {
 
           <p
             className="
+              mt-1
               text-xs
               uppercase
               tracking-wider
               text-zinc-500
-              mt-1
             "
           >
             of ${targetAmount.toLocaleString()}
@@ -216,22 +245,28 @@ const SavingChart = () => {
       </div>
 
       {/* Footer */}
-      <div className="relative text-center mt-2">
+      <div className="relative mt-2 text-center">
         <h3
           className="
-            text-base
-            font-semibold
             flex
             items-center
             justify-center
             gap-2
+            text-base
+            font-semibold
           "
         >
           You're on track
           <Sparkle size={15} className="text-green-300" />
         </h3>
 
-        <p className="text-sm text-zinc-400 mt-2">
+        <p
+          className="
+            mt-2
+            text-sm
+            text-zinc-400
+          "
+        >
           <AnimatedNumber
             value={remainingAmount}
             startValue={targetAmount}
@@ -242,7 +277,13 @@ const SavingChart = () => {
           remaining
         </p>
 
-        <p className="text-xs text-zinc-500 mt-1">
+        <p
+          className="
+            mt-1
+            text-xs
+            text-zinc-500
+          "
+        >
           Estimated completion • Oct 2026
         </p>
       </div>
