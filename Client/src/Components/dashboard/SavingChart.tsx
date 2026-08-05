@@ -104,7 +104,7 @@ const SavingChart = () => {
             w-52
             h-52
             rounded-full
-            bg-green-400/15
+            bg-green-400/10
             blur-3xl
           "
         />
@@ -128,7 +128,31 @@ const SavingChart = () => {
             strokeWidth="8"
           />
 
-          {/* Animated Circle */}
+          {/* Glow Circle */}
+          <motion.circle
+            cx="60"
+            cy="60"
+            r="52"
+            fill="none"
+            stroke="#4ade80"
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            opacity="0.35"
+            filter="blur(3px)"
+            initial={{
+              strokeDashoffset: circumference,
+            }}
+            animate={{
+              strokeDashoffset: circumference - progress,
+            }}
+            transition={{
+              duration: 1.4,
+              ease: "easeOut",
+            }}
+          />
+
+          {/* Main Circle */}
           <motion.circle
             cx="60"
             cy="60"
