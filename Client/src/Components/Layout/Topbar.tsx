@@ -7,7 +7,7 @@ const Topbar = () => {
       className="
     w-full
     h-24
-    px-8
+    px-5
     flex
     items-center
     justify-between
