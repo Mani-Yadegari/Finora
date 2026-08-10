@@ -61,9 +61,6 @@ const DialogContent = React.forwardRef<
         -translate-x-1/2
         -translate-y-1/2
 
-        max-h-[90vh]
-        overflow-y-auto
-
         rounded-3xl
 
         border
