@@ -34,7 +34,22 @@ function AlertDialogOverlay({
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        `
+        fixed
+        inset-0
+        z-50
+
+        bg-black/60
+        backdrop-blur-sm
+
+        data-open:animate-in
+        data-open:fade-in-0
+
+        data-closed:animate-out
+        data-closed:fade-out-0
+
+        duration-200
+        `,
         className,
       )}
       {...props}
@@ -52,41 +67,55 @@ function AlertDialogContent({
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
+
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         data-size={size}
         className={cn(
           `
-  group/alert-dialog-content
-  fixed
-  top-1/2
-  left-1/2
-  z-50
-  grid
-  w-full
-  -translate-x-1/2
-  -translate-y-1/2
-  gap-4
-  rounded-3xl
-  bg-zinc-950
-  p-4
-  text-white
-  shadow-2xl
-  outline-none
-  duration-100
+          group/alert-dialog-content
 
-  data-[size=default]:max-w-xs
-  data-[size=sm]:max-w-xs
-  data-[size=default]:sm:max-w-sm
+          fixed
+          left-1/2
+          top-1/2
+          z-50
 
-  data-open:animate-in
-  data-open:fade-in-0
-  data-open:zoom-in-95
+          -translate-x-1/2
+          -translate-y-1/2
 
-  data-closed:animate-out
-  data-closed:fade-out-0
-  data-closed:zoom-out-95
-  `,
+          w-[calc(100%-2rem)]
+          max-w-md
+
+          max-h-[90vh]
+          overflow-y-auto
+
+          rounded-3xl
+
+          border
+          border-white/10
+
+          bg-white/[0.06]
+
+          p-6
+
+          text-white
+
+          shadow-[0_30px_120px_rgba(0,0,0,0.8)]
+
+          backdrop-blur-3xl
+
+          outline-none
+
+          duration-200
+
+          data-open:animate-in
+          data-open:fade-in-0
+          data-open:zoom-in-95
+
+          data-closed:animate-out
+          data-closed:fade-out-0
+          data-closed:zoom-out-95
+          `,
           className,
         )}
         {...props}

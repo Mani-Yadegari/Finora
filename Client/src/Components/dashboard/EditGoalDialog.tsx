@@ -13,7 +13,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 import {
-  Target,
+  WalletCards,
   CalendarDays,
   Wallet,
   Minus,
@@ -30,6 +30,7 @@ import {
   PartyPopper,
   Gamepad2,
   Package,
+  FolderPen,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -51,6 +52,9 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
   const [deadline, setDeadline] = useState(`October ${currentYear}`);
 
   const [category, setCategory] = useState("Travel");
+  const [categoryOpen, setCategoryOpen] = useState(false);
+
+  const [deadlineOpen, setDeadlineOpen] = useState(false);
 
   const months = [
     "January",
@@ -214,7 +218,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               shadow-[0_0_30px_rgba(34,197,94,0.2)]
             "
           >
-            <Target size={26} />
+            <WalletCards size={26} />
           </div>
 
           <DialogTitle
@@ -246,7 +250,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
             </label>
 
             <div className="relative">
-              <Target
+              <FolderPen
                 size={16}
                 className="
                   absolute
@@ -272,7 +276,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               Category
             </label>
 
-            <Popover>
+            <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
               <PopoverTrigger asChild>
                 <button
                   className="
@@ -331,6 +335,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                         key={item.name}
                         onClick={() => {
                           setCategory(item.name);
+                          setCategoryOpen(false);
                         }}
                         className={`
                           flex
@@ -396,7 +401,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                 value={amount.toLocaleString()}
                 onChange={handleAmountChange}
                 className="
-                  h-full
+                  h-95
                   flex-1
                   bg-transparent
                   px-3
@@ -404,6 +409,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                   text-white
                   outline-none
                 "
+                required
               />
 
               <div className="flex gap-1 pr-2">
@@ -458,7 +464,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               Deadline
             </label>
 
-            <Popover>
+            <Popover open={deadlineOpen} onOpenChange={setDeadlineOpen}>
               <PopoverTrigger asChild>
                 <button
                   className="
@@ -579,6 +585,8 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                         setSelectedMonth(month);
 
                         setDeadline(`${month} ${selectedYear}`);
+
+                        setDeadlineOpen(false);
                       }}
                       className={`
                         rounded-lg

@@ -20,7 +20,7 @@ const SavingChart = () => {
       className="
         relative
         overflow-hidden
-        h-full
+        h-95
         bg-white/[0.04]
         backdrop-blur-2xl
         border-white/10

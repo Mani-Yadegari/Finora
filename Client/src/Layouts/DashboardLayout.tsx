@@ -57,9 +57,9 @@ const DashboardLayout = () => {
         className="
           absolute
           inset-0
-          opacity-[0.03]
+          opacity-[13]
           pointer-events-none
-          bg-[url('https://grainy-gradients.vercel.app/noise.svg')]
+          bg-[url('/noise.svg')]
         "
       />
 
