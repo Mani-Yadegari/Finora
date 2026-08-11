@@ -1,55 +1,62 @@
+import { useMemo, useState } from "react";
 import { ReceiptText } from "lucide-react";
 
-import TransactionFilters from "../components/transactions/TransactionFilters";
+import TransactionFilters, {
+  type TransactionFilterValues,
+} from "../components/transactions/TransactionFilters";
+
 import TransactionTable from "../components/transactions/TransactionTable";
 
+import { transactions } from "../components/transactions/transactionsData";
+
+const initialFilters: TransactionFilterValues = {
+  type: "all",
+  categories: [],
+  date: null,
+  amount: null,
+  customMin: "",
+  customMax: "",
+  customFrom: "",
+  customTo: "",
+};
+
 const Transactions = () => {
-  const monthlyTransactionCount = 12;
+  const [search, setSearch] = useState("");
+
+  const [appliedFilters, setAppliedFilters] =
+    useState<TransactionFilterValues>(initialFilters);
+
+  const handleApplyFilters = (filters: TransactionFilterValues) => {
+    setAppliedFilters(filters);
+  };
+
+  /*
+   * Count all transactions.
+   *
+   * Later, when real data comes from the backend,
+   * this will automatically use the real transaction array.
+   */
+  const transactionCount = useMemo(() => {
+    return transactions.length;
+  }, []);
 
   return (
     <div className="relative space-y-6">
       {/* Header */}
-      <div
-        className="
-          relative
-          overflow-hidden
-          rounded-2xl
-          border
-          border-white/[0.07]
-          bg-white/[0.025]
-          px-6
-          py-5
-          backdrop-blur-xl
-          shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]
-        "
-      >
+      <div className="relative">
         {/* Ambient Glow */}
         <div
           className="
             pointer-events-none
             absolute
-            -bottom-32
-            left-1/3
-            h-56
-            w-56
-            rounded-full
-            bg-emerald-500/[0.035]
-            blur-3xl
-          "
-        />
-
-        {/* Top Glow */}
-        <div
-          className="
-            pointer-events-none
-            absolute
-            -top-20
             left-1/4
-            h-32
-            w-64
-            rounded-full
-            bg-green-400/[0.025]
-            blur-3xl
+            top-0
+            h-px
+            w-1/2
+            bg-gradient-to-r
+            from-transparent
+            via-white/[0.08]
+            to-transparent
           "
         />
 
@@ -115,7 +122,7 @@ const Transactions = () => {
             </div>
           </div>
 
-          {/* Monthly Stat */}
+          {/* Transaction Stat */}
           <div
             className="
               hidden
@@ -124,10 +131,7 @@ const Transactions = () => {
               sm:flex
             "
           >
-            {/* Icon */}
-
-            {/* Stat */}
-            <div className="text-right ">
+            <div className="text-right">
               <div className="mt-1.5 flex items-center justify-end gap-1.5">
                 <span
                   className="
@@ -148,9 +152,10 @@ const Transactions = () => {
                     text-zinc-500
                   "
                 >
-                  This month
+                  Total
                 </span>
               </div>
+
               <div className="flex items-baseline justify-end gap-1.5">
                 <span
                   className="
@@ -161,7 +166,7 @@ const Transactions = () => {
                     text-white
                   "
                 >
-                  {monthlyTransactionCount}
+                  {transactionCount}
                 </span>
 
                 <span
@@ -181,10 +186,15 @@ const Transactions = () => {
       </div>
 
       {/* Filters */}
-      <TransactionFilters />
+      <TransactionFilters
+        search={search}
+        onSearchChange={setSearch}
+        onApply={handleApplyFilters}
+        appliedFilters={appliedFilters}
+      />
 
       {/* Table */}
-      <TransactionTable />
+      <TransactionTable search={search} filters={appliedFilters} />
     </div>
   );
 };

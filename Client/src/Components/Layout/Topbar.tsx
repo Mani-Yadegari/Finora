@@ -1,61 +1,18 @@
-import { Search, Bell, Plus, User } from "lucide-react";
+import { useState } from "react";
+import { Bell, Plus, User } from "lucide-react";
+
 import Logo from "./Logo";
+import AddTransactionDialog from "../transactions/AddTransactionDialog";
 
 const Topbar = () => {
+  const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
+
   return (
-    <header
-      className="
-    w-full
-    h-24
-    px-5
-    flex
-    items-center
-    justify-between
-    backdrop-blur-xl
-    shadow-[0_12px_40px_rgba(0,0,0,0.18)]
-  "
-    >
+    <header className="flex items-center justify-between h-20 px-8">
       {/* Logo */}
-      <div className="flex items-center">
-        <Logo />
-      </div>
+      <Logo />
 
       <div className="flex items-center gap-3">
-        {/* Search */}
-        <div
-          className="
-            flex
-            items-center
-            gap-3
-            h-11
-            px-4
-            rounded-xl
-            bg-white/[0.08]
-            backdrop-blur-xl
-            border
-            border-white/10
-            shadow-inner
-            shadow-white/5
-            focus-within:bg-white/[0.12]
-            focus-within:border-green-400/20
-            transition
-          "
-        >
-          <Search size={18} className="text-zinc-400 shrink-0" />
-
-          <input
-            type="text"
-            placeholder="Search..."
-            className="
-              bg-transparent
-              outline-none
-              text-sm
-              w-48
-              placeholder:text-zinc-500
-            "
-          />
-        </div>
-
         {/* Notification */}
         <button
           className="
@@ -93,6 +50,7 @@ const Topbar = () => {
 
         {/* Add Transaction */}
         <button
+          onClick={() => setIsAddTransactionOpen(true)}
           className="
             flex
             items-center
@@ -146,6 +104,12 @@ const Topbar = () => {
           <User size={22} />
         </button>
       </div>
+
+      {/* Add Transaction Dialog */}
+      <AddTransactionDialog
+        open={isAddTransactionOpen}
+        onOpenChange={setIsAddTransactionOpen}
+      />
     </header>
   );
 };

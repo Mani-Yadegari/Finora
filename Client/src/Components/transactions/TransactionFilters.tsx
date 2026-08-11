@@ -11,9 +11,9 @@ import {
   ChevronUp,
 } from "lucide-react";
 
-type TransactionType = "all" | "income" | "expense";
+export type TransactionType = "all" | "income" | "expense";
 
-type DateFilter =
+export type DateFilter =
   | "today"
   | "this-week"
   | "this-month"
@@ -21,7 +21,7 @@ type DateFilter =
   | "custom"
   | null;
 
-type AmountFilter =
+export type AmountFilter =
   | "under-50"
   | "50-100"
   | "100-500"
@@ -29,6 +29,24 @@ type AmountFilter =
   | "over-1000"
   | "custom"
   | null;
+
+export interface TransactionFilterValues {
+  type: TransactionType;
+  categories: string[];
+  date: DateFilter;
+  amount: AmountFilter;
+  customMin: string;
+  customMax: string;
+  customFrom: string;
+  customTo: string;
+}
+
+interface TransactionFiltersProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+  onApply: (filters: TransactionFilterValues) => void;
+  appliedFilters: TransactionFilterValues;
+}
 
 const categories = [
   "Home",
@@ -46,28 +64,41 @@ const categories = [
   "Other",
 ];
 
-const TransactionFilters = () => {
-  const [search, setSearch] = useState("");
+const createEmptyFilters = (): TransactionFilterValues => ({
+  type: "all",
+  categories: [],
+  date: null,
+  amount: null,
+  customMin: "",
+  customMax: "",
+  customFrom: "",
+  customTo: "",
+});
 
-  const [activeType, setActiveType] = useState<TransactionType>("all");
-
+const TransactionFilters = ({
+  search,
+  onSearchChange,
+  onApply,
+  appliedFilters,
+}: TransactionFiltersProps) => {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
   const [amountOpen, setAmountOpen] = useState(false);
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [draftFilters, setDraftFilters] =
+    useState<TransactionFilterValues>(appliedFilters);
 
-  const [dateFilter, setDateFilter] = useState<DateFilter>(null);
-
-  const [amountFilter, setAmountFilter] = useState<AmountFilter>(null);
-
-  const [customMin, setCustomMin] = useState("");
-  const [customMax, setCustomMax] = useState("");
-
-  const [customFrom, setCustomFrom] = useState("");
-  const [customTo, setCustomTo] = useState("");
+  /*
+   * Sync draft with applied filters.
+   */
+  useEffect(() => {
+    setDraftFilters({
+      ...appliedFilters,
+      categories: [...appliedFilters.categories],
+    });
+  }, [appliedFilters]);
 
   /*
    * Alt + K → Focus Search
@@ -92,57 +123,210 @@ const TransactionFilters = () => {
     };
   }, []);
 
+  /*
+   * Generic draft updater
+   */
+  const updateDraft = <K extends keyof TransactionFilterValues>(
+    key: K,
+    value: TransactionFilterValues[K],
+  ) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  /*
+   * Transaction Type
+   *
+   * IMPORTANT:
+   * Type filter is applied IMMEDIATELY.
+   *
+   * Income / Expense / All do NOT require
+   * clicking "Apply filters".
+   */
+  const toggleType = (type: TransactionType) => {
+    const nextType = draftFilters.type === type ? "all" : type;
+
+    const nextFilters: TransactionFilterValues = {
+      ...draftFilters,
+      type: nextType,
+      categories: [...draftFilters.categories],
+    };
+
+    // Update local state immediately
+    setDraftFilters(nextFilters);
+
+    // Apply immediately to parent/table
+    onApply(nextFilters);
+  };
+
+  /*
+   * Category
+   */
   const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category],
-    );
+    setDraftFilters((prev) => {
+      const exists = prev.categories.includes(category);
+
+      return {
+        ...prev,
+        categories: exists
+          ? prev.categories.filter((item) => item !== category)
+          : [...prev.categories, category],
+      };
+    });
   };
 
+  /*
+   * Date
+   */
+  const toggleDate = (value: DateFilter) => {
+    setDraftFilters((prev) => {
+      const isSelected = prev.date === value;
+
+      if (isSelected) {
+        return {
+          ...prev,
+          date: null,
+          customFrom: "",
+          customTo: "",
+        };
+      }
+
+      return {
+        ...prev,
+        date: value,
+      };
+    });
+  };
+
+  /*
+   * Amount preset
+   */
+  const toggleAmount = (value: AmountFilter) => {
+    setDraftFilters((prev) => {
+      const isSelected = prev.amount === value;
+
+      if (isSelected) {
+        return {
+          ...prev,
+          amount: null,
+          customMin: "",
+          customMax: "",
+        };
+      }
+
+      return {
+        ...prev,
+        amount: value,
+        customMin: "",
+        customMax: "",
+      };
+    });
+  };
+
+  /*
+   * Custom Amount
+   */
+  const updateCustomAmount = (
+    field: "customMin" | "customMax",
+    rawValue: string,
+  ) => {
+    const value = rawValue.replace(/[^\d]/g, "");
+
+    setDraftFilters((prev) => {
+      const next = {
+        ...prev,
+        [field]: value,
+      };
+
+      const hasMin = next.customMin !== "";
+      const hasMax = next.customMax !== "";
+
+      return {
+        ...next,
+        amount: hasMin || hasMax ? "custom" : null,
+      };
+    });
+  };
+
+  /*
+   * Custom Date
+   */
+  const updateCustomDate = (
+    field: "customFrom" | "customTo",
+    value: string,
+  ) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      date: "custom",
+      [field]: value,
+    }));
+  };
+
+  /*
+   * Clear ALL filters
+   *
+   * This is immediate.
+   */
   const clearFilters = () => {
-    setSelectedCategories([]);
+    const emptyFilters = createEmptyFilters();
 
-    setDateFilter(null);
-    setAmountFilter(null);
+    setDraftFilters(emptyFilters);
+    onApply(emptyFilters);
 
-    setCustomMin("");
-    setCustomMax("");
-
-    setCustomFrom("");
-    setCustomTo("");
-
-    setActiveType("all");
+    setFilterOpen(false);
+    setCategoryOpen(false);
+    setDateOpen(false);
+    setAmountOpen(false);
   };
 
+  /*
+   * Draft filter count
+   */
   const activeFilterCount =
-    selectedCategories.length +
-    (dateFilter ? 1 : 0) +
-    (amountFilter ? 1 : 0) +
-    (activeType !== "all" ? 1 : 0);
+    draftFilters.categories.length +
+    (draftFilters.date ? 1 : 0) +
+    (draftFilters.amount ? 1 : 0) +
+    (draftFilters.type !== "all" ? 1 : 0);
 
+  /*
+   * Applied filter count
+   */
+  const appliedFilterCount =
+    appliedFilters.categories.length +
+    (appliedFilters.date ? 1 : 0) +
+    (appliedFilters.amount ? 1 : 0) +
+    (appliedFilters.type !== "all" ? 1 : 0);
+
+  /*
+   * Accordion
+   */
   const toggleSection = (section: "category" | "date" | "amount") => {
     if (section === "category") {
       setCategoryOpen((prev) => !prev);
       setDateOpen(false);
       setAmountOpen(false);
+      return;
     }
 
     if (section === "date") {
       setDateOpen((prev) => !prev);
       setCategoryOpen(false);
       setAmountOpen(false);
+      return;
     }
 
-    if (section === "amount") {
-      setAmountOpen((prev) => !prev);
-      setCategoryOpen(false);
-      setDateOpen(false);
-    }
+    setAmountOpen((prev) => !prev);
+    setCategoryOpen(false);
+    setDateOpen(false);
   };
 
+  /*
+   * Date label
+   */
   const getDateLabel = () => {
-    switch (dateFilter) {
+    switch (draftFilters.date) {
       case "today":
         return "Today";
 
@@ -163,8 +347,11 @@ const TransactionFilters = () => {
     }
   };
 
+  /*
+   * Amount label
+   */
   const getAmountLabel = () => {
-    switch (amountFilter) {
+    switch (draftFilters.amount) {
       case "under-50":
         return "Under $50";
 
@@ -180,18 +367,51 @@ const TransactionFilters = () => {
       case "over-1000":
         return "$1,000+";
 
-      case "custom":
-        return customMin && customMax
-          ? `$${customMin} – $${customMax}`
-          : customMin
-            ? `$${customMin}+`
-            : customMax
-              ? `Up to $${customMax}`
-              : "Custom range";
+      case "custom": {
+        const hasMin = draftFilters.customMin !== "";
+        const hasMax = draftFilters.customMax !== "";
+
+        if (hasMin && hasMax) {
+          return `$${Number(
+            draftFilters.customMin,
+          ).toLocaleString()} – $${Number(
+            draftFilters.customMax,
+          ).toLocaleString()}`;
+        }
+
+        if (hasMin) {
+          return `$${Number(draftFilters.customMin).toLocaleString()}+`;
+        }
+
+        if (hasMax) {
+          return `Up to $${Number(draftFilters.customMax).toLocaleString()}`;
+        }
+
+        return "Custom range";
+      }
 
       default:
         return "Any amount";
     }
+  };
+
+  /*
+   * Apply filters
+   *
+   * Used only for Category / Date / Amount.
+   */
+  const handleApply = () => {
+    const nextFilters: TransactionFilterValues = {
+      ...draftFilters,
+      categories: [...draftFilters.categories],
+    };
+
+    onApply(nextFilters);
+
+    setFilterOpen(false);
+    setCategoryOpen(false);
+    setDateOpen(false);
+    setAmountOpen(false);
   };
 
   return (
@@ -265,7 +485,7 @@ const TransactionFilters = () => {
             id="transaction-search"
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search transactions..."
             className="
               h-full
@@ -285,7 +505,7 @@ const TransactionFilters = () => {
           {search && (
             <button
               type="button"
-              onClick={() => setSearch("")}
+              onClick={() => onSearchChange("")}
               className="
                 mr-2
                 flex
@@ -359,65 +579,43 @@ const TransactionFilters = () => {
               p-1
             "
           >
-            <button
-              type="button"
-              onClick={() => setActiveType("all")}
-              className={`
-                h-9
-                rounded-xl
-                px-4
-                text-xs
-                font-medium
-                transition-all
-                ${
-                  activeType === "all"
-                    ? "bg-white/[0.11] text-white"
-                    : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
-                }
-              `}
-            >
-              All
-            </button>
+            {(["all", "income", "expense"] as TransactionType[]).map((type) => {
+              const selected = appliedFilters.type === type;
 
-            <button
-              type="button"
-              onClick={() => setActiveType("income")}
-              className={`
-                h-9
-                rounded-xl
-                px-4
-                text-xs
-                font-medium
-                transition-all
-                ${
-                  activeType === "income"
-                    ? "bg-green-400/[0.12] text-green-400"
-                    : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
-                }
-              `}
-            >
-              Income
-            </button>
+              const label =
+                type === "all"
+                  ? "All"
+                  : type === "income"
+                    ? "Income"
+                    : "Expense";
 
-            <button
-              type="button"
-              onClick={() => setActiveType("expense")}
-              className={`
-                h-9
-                rounded-xl
-                px-4
-                text-xs
-                font-medium
-                transition-all
-                ${
-                  activeType === "expense"
-                    ? "bg-red-400/[0.12] text-red-400"
-                    : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
-                }
-              `}
-            >
-              Expense
-            </button>
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => toggleType(type)}
+                  className={`
+                    h-9
+                    rounded-xl
+                    px-4
+                    text-xs
+                    font-medium
+                    transition-all
+                    ${
+                      selected
+                        ? type === "income"
+                          ? "bg-green-400/[0.12] text-green-400"
+                          : type === "expense"
+                            ? "bg-red-400/[0.12] text-red-400"
+                            : "bg-white/[0.11] text-white"
+                        : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                    }
+                  `}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           <div className="hidden h-7 w-px bg-white/[0.08] lg:block" />
@@ -466,7 +664,7 @@ const TransactionFilters = () => {
 
               <span>Filter</span>
 
-              {activeFilterCount > 0 && (
+              {appliedFilterCount > 0 && (
                 <span
                   className="
                     flex
@@ -482,7 +680,7 @@ const TransactionFilters = () => {
                     text-black
                   "
                 >
-                  {activeFilterCount}
+                  {appliedFilterCount}
                 </span>
               )}
             </button>
@@ -582,8 +780,8 @@ const TransactionFilters = () => {
                         </p>
 
                         <p className="mt-1 text-xs text-zinc-500">
-                          {selectedCategories.length > 0
-                            ? `${selectedCategories.length} selected`
+                          {draftFilters.categories.length > 0
+                            ? `${draftFilters.categories.length} selected`
                             : "Any category"}
                         </p>
                       </div>
@@ -601,7 +799,7 @@ const TransactionFilters = () => {
                       <div className="grid grid-cols-2 gap-1.5">
                         {categories.map((category) => {
                           const selected =
-                            selectedCategories.includes(category);
+                            draftFilters.categories.includes(category);
 
                           return (
                             <button
@@ -716,13 +914,13 @@ const TransactionFilters = () => {
                         ["this-month", "This month"],
                         ["last-month", "Last month"],
                       ].map(([value, label]) => {
-                        const selected = dateFilter === value;
+                        const selected = draftFilters.date === value;
 
                         return (
                           <button
                             key={value}
                             type="button"
-                            onClick={() => setDateFilter(value as DateFilter)}
+                            onClick={() => toggleDate(value as DateFilter)}
                             className={`
                               flex
                               w-full
@@ -752,7 +950,7 @@ const TransactionFilters = () => {
                       {/* Custom Date */}
                       <button
                         type="button"
-                        onClick={() => setDateFilter("custom")}
+                        onClick={() => toggleDate("custom")}
                         className={`
                           flex
                           w-full
@@ -766,17 +964,17 @@ const TransactionFilters = () => {
                           font-medium
                           transition
                           ${
-                            dateFilter === "custom"
+                            draftFilters.date === "custom"
                               ? "bg-green-400/[0.08] text-green-400"
                               : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
                           }
                         `}
                       >
                         Custom range
-                        {dateFilter === "custom" && <Check size={14} />}
+                        {draftFilters.date === "custom" && <Check size={14} />}
                       </button>
 
-                      {dateFilter === "custom" && (
+                      {draftFilters.date === "custom" && (
                         <div className="grid grid-cols-2 gap-2 pt-1">
                           <div>
                             <label className="mb-1.5 block text-xs font-medium text-zinc-500">
@@ -785,8 +983,13 @@ const TransactionFilters = () => {
 
                             <input
                               type="date"
-                              value={customFrom}
-                              onChange={(e) => setCustomFrom(e.target.value)}
+                              value={draftFilters.customFrom}
+                              onChange={(event) =>
+                                updateCustomDate(
+                                  "customFrom",
+                                  event.target.value,
+                                )
+                              }
                               className="
                                 h-9
                                 w-full
@@ -810,8 +1013,10 @@ const TransactionFilters = () => {
 
                             <input
                               type="date"
-                              value={customTo}
-                              onChange={(e) => setCustomTo(e.target.value)}
+                              value={draftFilters.customTo}
+                              onChange={(event) =>
+                                updateCustomDate("customTo", event.target.value)
+                              }
                               className="
                                 h-9
                                 w-full
@@ -896,14 +1101,14 @@ const TransactionFilters = () => {
                           ["500-1000", "$500 – $1,000"],
                           ["over-1000", "$1,000+"],
                         ].map(([value, label]) => {
-                          const selected = amountFilter === value;
+                          const selected = draftFilters.amount === value;
 
                           return (
                             <button
                               key={value}
                               type="button"
                               onClick={() =>
-                                setAmountFilter(value as AmountFilter)
+                                toggleAmount(value as AmountFilter)
                               }
                               className={`
                                 flex
@@ -969,13 +1174,15 @@ const TransactionFilters = () => {
                               </span>
 
                               <input
-                                type="number"
-                                min="0"
-                                value={customMin}
-                                onChange={(e) => {
-                                  setCustomMin(e.target.value);
-                                  setAmountFilter("custom");
-                                }}
+                                type="text"
+                                inputMode="numeric"
+                                value={draftFilters.customMin}
+                                onChange={(event) =>
+                                  updateCustomAmount(
+                                    "customMin",
+                                    event.target.value,
+                                  )
+                                }
                                 placeholder="0"
                                 className="
                                   h-full
@@ -986,9 +1193,6 @@ const TransactionFilters = () => {
                                   text-zinc-300
                                   outline-none
                                   placeholder:text-zinc-700
-                                  [appearance:textfield]
-                                  [&::-webkit-outer-spin-button]:appearance-none
-                                  [&::-webkit-inner-spin-button]:appearance-none
                                 "
                               />
                             </div>
@@ -1018,13 +1222,15 @@ const TransactionFilters = () => {
                               </span>
 
                               <input
-                                type="number"
-                                min="0"
-                                value={customMax}
-                                onChange={(e) => {
-                                  setCustomMax(e.target.value);
-                                  setAmountFilter("custom");
-                                }}
+                                type="text"
+                                inputMode="numeric"
+                                value={draftFilters.customMax}
+                                onChange={(event) =>
+                                  updateCustomAmount(
+                                    "customMax",
+                                    event.target.value,
+                                  )
+                                }
                                 placeholder="∞"
                                 className="
                                   h-full
@@ -1035,9 +1241,6 @@ const TransactionFilters = () => {
                                   text-zinc-300
                                   outline-none
                                   placeholder:text-zinc-700
-                                  [appearance:textfield]
-                                  [&::-webkit-outer-spin-button]:appearance-none
-                                  [&::-webkit-inner-spin-button]:appearance-none
                                 "
                               />
                             </div>
@@ -1065,18 +1268,13 @@ const TransactionFilters = () => {
                     {activeFilterCount > 0
                       ? `${activeFilterCount} filter${
                           activeFilterCount > 1 ? "s" : ""
-                        } active`
+                        } ready`
                       : "No filters applied"}
                   </span>
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setFilterOpen(false);
-                      setCategoryOpen(false);
-                      setDateOpen(false);
-                      setAmountOpen(false);
-                    }}
+                    onClick={handleApply}
                     className="
                       rounded-lg
                       bg-green-400

@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import Card from "../ui/Card";
+import MoreActionsMenu from "../ui/MoreActionsMenu.tsx";
+
 import EditTransactionDialog from "./EditTransactionDialog";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
+
+import { transactions, type Transaction } from "./transactionsData";
 
 import {
   Clapperboard,
@@ -10,56 +14,14 @@ import {
   Briefcase,
   Utensils,
   CircleDollarSign,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
 } from "lucide-react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+import type { TransactionFilterValues } from "./TransactionFilters";
 
-type TransactionType = "income" | "expense";
-
-interface Transaction {
-  id: string;
-  name: string;
-  category: string;
-  date: string;
-  amount: number;
-  type: TransactionType;
+interface TransactionTableProps {
+  search: string;
+  filters: TransactionFilterValues;
 }
-
-const transactions: Transaction[] = [
-  {
-    id: "1",
-    name: "Netflix Subscription",
-    category: "Entertainment",
-    date: "Aug 01, 2026",
-    amount: 15,
-    type: "expense",
-  },
-  {
-    id: "2",
-    name: "Freelance Payment",
-    category: "Freelance",
-    date: "Aug 02, 2026",
-    amount: 1200,
-    type: "income",
-  },
-  {
-    id: "3",
-    name: "Grocery Shopping",
-    category: "Food",
-    date: "Aug 03, 2026",
-    amount: 85,
-    type: "expense",
-  },
-];
 
 const getTransactionIcon = (category: string) => {
   switch (category) {
@@ -80,7 +42,127 @@ const getTransactionIcon = (category: string) => {
   }
 };
 
-const TransactionTable = () => {
+const normalizeDate = (dateString: string) => {
+  return new Date(dateString);
+};
+
+const isDateInFilter = (
+  transactionDate: string,
+  filters: TransactionFilterValues,
+) => {
+  if (!filters.date) {
+    return true;
+  }
+
+  const date = normalizeDate(transactionDate);
+
+  if (Number.isNaN(date.getTime())) {
+    return true;
+  }
+
+  const now = new Date();
+
+  if (filters.date === "today") {
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate()
+    );
+  }
+
+  if (filters.date === "this-week") {
+    const startOfWeek = new Date(now);
+    const day = startOfWeek.getDay();
+
+    const diff = day === 0 ? 6 : day - 1;
+
+    startOfWeek.setDate(startOfWeek.getDate() - diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+    return date >= startOfWeek && date < endOfWeek;
+  }
+
+  if (filters.date === "this-month") {
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth()
+    );
+  }
+
+  if (filters.date === "last-month") {
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    return (
+      date.getFullYear() === lastMonth.getFullYear() &&
+      date.getMonth() === lastMonth.getMonth()
+    );
+  }
+
+  if (filters.date === "custom") {
+    if (filters.customFrom) {
+      const from = new Date(`${filters.customFrom}T00:00:00`);
+
+      if (date < from) {
+        return false;
+      }
+    }
+
+    if (filters.customTo) {
+      const to = new Date(`${filters.customTo}T23:59:59`);
+
+      if (date > to) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return true;
+};
+
+const isAmountInFilter = (amount: number, filters: TransactionFilterValues) => {
+  switch (filters.amount) {
+    case "under-50":
+      return amount < 50;
+
+    case "50-100":
+      return amount >= 50 && amount <= 100;
+
+    case "100-500":
+      return amount > 100 && amount <= 500;
+
+    case "500-1000":
+      return amount > 500 && amount <= 1000;
+
+    case "over-1000":
+      return amount > 1000;
+
+    case "custom": {
+      const min = filters.customMin !== "" ? Number(filters.customMin) : null;
+
+      const max = filters.customMax !== "" ? Number(filters.customMax) : null;
+
+      if (min !== null && amount < min) {
+        return false;
+      }
+
+      if (max !== null && amount > max) {
+        return false;
+      }
+
+      return true;
+    }
+
+    default:
+      return true;
+  }
+};
+
+const TransactionTable = ({ search, filters }: TransactionTableProps) => {
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
 
@@ -90,6 +172,59 @@ const TransactionTable = () => {
     useState<Transaction | null>(null);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const filteredTransactions = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    return transactions.filter((item) => {
+      /*
+       * Search
+       */
+      if (normalizedSearch) {
+        const matchesSearch =
+          item.name.toLowerCase().includes(normalizedSearch) ||
+          item.category.toLowerCase().includes(normalizedSearch) ||
+          item.date.toLowerCase().includes(normalizedSearch);
+
+        if (!matchesSearch) {
+          return false;
+        }
+      }
+
+      /*
+       * Type
+       */
+      if (filters.type !== "all" && item.type !== filters.type) {
+        return false;
+      }
+
+      /*
+       * Category
+       */
+      if (
+        filters.categories.length > 0 &&
+        !filters.categories.includes(item.category)
+      ) {
+        return false;
+      }
+
+      /*
+       * Date
+       */
+      if (!isDateInFilter(item.date, filters)) {
+        return false;
+      }
+
+      /*
+       * Amount
+       */
+      if (!isAmountInFilter(item.amount, filters)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [search, filters]);
 
   return (
     <>
@@ -169,7 +304,7 @@ const TransactionTable = () => {
 
         {/* Table Rows */}
         <div className="divide-y divide-white/[0.045]">
-          {transactions.map((item) => {
+          {filteredTransactions.map((item) => {
             const Icon = getTransactionIcon(item.category);
 
             return (
@@ -183,10 +318,6 @@ const TransactionTable = () => {
                   gap-6
                   px-6
                   py-4
-
-                  transition-all
-                  duration-200
-
                   hover:bg-white/[0.018]
                 "
               >
@@ -200,21 +331,14 @@ const TransactionTable = () => {
                       shrink-0
                       items-center
                       justify-center
-
                       rounded-xl
-
                       border
                       border-white/[0.07]
-
                       bg-white/[0.025]
-
                       text-zinc-500
-
                       shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]
-
                       transition-all
                       duration-200
-
                       group-hover:border-white/[0.10]
                       group-hover:bg-white/[0.04]
                       group-hover:text-zinc-300
@@ -244,24 +368,17 @@ const TransactionTable = () => {
                     className="
                       inline-flex
                       items-center
-
                       rounded-lg
-
                       border
                       border-white/[0.06]
-
                       bg-white/[0.025]
-
                       px-2.5
                       py-1
-
                       text-[11px]
                       font-medium
                       text-zinc-500
-
                       transition-all
                       duration-200
-
                       group-hover:border-white/[0.08]
                       group-hover:text-zinc-400
                     "
@@ -289,7 +406,6 @@ const TransactionTable = () => {
                     text-sm
                     font-semibold
                     tracking-tight
-
                     ${
                       item.type === "income" ? "text-green-400" : "text-red-400"
                     }
@@ -300,112 +416,51 @@ const TransactionTable = () => {
                 </span>
 
                 {/* Actions */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="
-                        flex
-                        h-8
-                        w-8
-                        items-center
-                        justify-center
-
-                        rounded-lg
-
-                        text-zinc-700
-
-                        outline-none
-
-                        transition-all
-                        duration-200
-
-                        hover:bg-white/[0.06]
-                        hover:text-zinc-300
-
-                        focus-visible:ring-1
-                        focus-visible:ring-white/20
-
-                        group-hover:text-zinc-500
-                      "
-                      aria-label={`Actions for ${item.name}`}
-                    >
-                      <MoreHorizontal size={17} />
-                    </button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent
-                    align="end"
-                    sideOffset={8}
-                    className="
-                      w-40
-
-                      rounded-xl
-
-                      border
-                      border-white/[0.08]
-
-                      bg-[#101211]/95
-
-                      p-1
-
-                      text-zinc-300
-
-                      shadow-[0_20px_60px_rgba(0,0,0,0.5)]
-
-                      backdrop-blur-2xl
-                    "
-                  >
-                    {/* Edit */}
-                    <DropdownMenuItem
-                      className="
-                        gap-2
-                        rounded-lg
-
-                        text-zinc-400
-
-                        outline-none
-
-                        focus:bg-white/[0.06]
-                        focus:text-white
-                      "
-                      onClick={() => {
-                        setSelectedTransaction(item);
-                        setEditDialogOpen(true);
-                      }}
-                    >
-                      <Pencil size={14} />
-                      Edit
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator className="my-1 bg-white/[0.07]" />
-
-                    {/* Delete */}
-                    <DropdownMenuItem
-                      className="
-                        gap-2
-                        rounded-lg
-
-                        text-red-400
-
-                        outline-none
-
-                        focus:bg-red-500/[0.08]
-                        focus:text-red-400
-                      "
-                      onClick={() => {
-                        setSelectedDeleteTransaction(item);
-                        setDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 size={14} />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <MoreActionsMenu
+                  label={`Actions for ${item.name}`}
+                  onEdit={() => {
+                    setSelectedTransaction(item);
+                    setEditDialogOpen(true);
+                  }}
+                  onDelete={() => {
+                    setSelectedDeleteTransaction(item);
+                    setDeleteDialogOpen(true);
+                  }}
+                />
               </div>
             );
           })}
+
+          {/* Empty State */}
+          {filteredTransactions.length === 0 && (
+            <div className="px-6 py-14 text-center">
+              <div
+                className="
+                  mx-auto
+                  flex
+                  h-10
+                  w-10
+                  items-center
+                  justify-center
+                  rounded-xl
+                  border
+                  border-white/[0.07]
+                  bg-white/[0.025]
+                  text-zinc-600
+                "
+              >
+                <CircleDollarSign size={18} />
+              </div>
+
+              <p className="mt-3 text-sm font-medium text-zinc-300">
+                No transactions found
+              </p>
+
+              <p className="mt-1 text-xs text-zinc-600">
+                Try adjusting your search or filters.
+              </p>
+            </div>
+          )}
         </div>
       </Card>
 
