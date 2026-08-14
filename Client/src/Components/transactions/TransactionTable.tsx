@@ -6,7 +6,8 @@ import MoreActionsMenu from "../ui/MoreActionsMenu.tsx";
 import EditTransactionDialog from "./EditTransactionDialog";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 
-import { transactions, type Transaction } from "./transactionsData";
+import { useTransactions } from "./TransactionsContext";
+import type { Transaction } from "./transactionsData";
 
 import {
   Clapperboard,
@@ -40,88 +41,6 @@ const getTransactionIcon = (category: string) => {
     default:
       return CircleDollarSign;
   }
-};
-
-const normalizeDate = (dateString: string) => {
-  return new Date(dateString);
-};
-
-const isDateInFilter = (
-  transactionDate: string,
-  filters: TransactionFilterValues,
-) => {
-  if (!filters.date) {
-    return true;
-  }
-
-  const date = normalizeDate(transactionDate);
-
-  if (Number.isNaN(date.getTime())) {
-    return true;
-  }
-
-  const now = new Date();
-
-  if (filters.date === "today") {
-    return (
-      date.getFullYear() === now.getFullYear() &&
-      date.getMonth() === now.getMonth() &&
-      date.getDate() === now.getDate()
-    );
-  }
-
-  if (filters.date === "this-week") {
-    const startOfWeek = new Date(now);
-    const day = startOfWeek.getDay();
-
-    const diff = day === 0 ? 6 : day - 1;
-
-    startOfWeek.setDate(startOfWeek.getDate() - diff);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 7);
-
-    return date >= startOfWeek && date < endOfWeek;
-  }
-
-  if (filters.date === "this-month") {
-    return (
-      date.getFullYear() === now.getFullYear() &&
-      date.getMonth() === now.getMonth()
-    );
-  }
-
-  if (filters.date === "last-month") {
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-
-    return (
-      date.getFullYear() === lastMonth.getFullYear() &&
-      date.getMonth() === lastMonth.getMonth()
-    );
-  }
-
-  if (filters.date === "custom") {
-    if (filters.customFrom) {
-      const from = new Date(`${filters.customFrom}T00:00:00`);
-
-      if (date < from) {
-        return false;
-      }
-    }
-
-    if (filters.customTo) {
-      const to = new Date(`${filters.customTo}T23:59:59`);
-
-      if (date > to) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  return true;
 };
 
 const isAmountInFilter = (amount: number, filters: TransactionFilterValues) => {
@@ -163,6 +82,9 @@ const isAmountInFilter = (amount: number, filters: TransactionFilterValues) => {
 };
 
 const TransactionTable = ({ search, filters }: TransactionTableProps) => {
+  const { transactions, deleteTransaction, updateTransaction } =
+    useTransactions();
+
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
 
@@ -174,33 +96,24 @@ const TransactionTable = ({ search, filters }: TransactionTableProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const filteredTransactions = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
 
     return transactions.filter((item) => {
-      /*
-       * Search
-       */
-      if (normalizedSearch) {
-        const matchesSearch =
-          item.name.toLowerCase().includes(normalizedSearch) ||
-          item.category.toLowerCase().includes(normalizedSearch) ||
-          item.date.toLowerCase().includes(normalizedSearch);
+      if (query) {
+        const match =
+          item.name.toLowerCase().includes(query) ||
+          item.category.toLowerCase().includes(query) ||
+          item.date.toLowerCase().includes(query);
 
-        if (!matchesSearch) {
+        if (!match) {
           return false;
         }
       }
 
-      /*
-       * Type
-       */
       if (filters.type !== "all" && item.type !== filters.type) {
         return false;
       }
 
-      /*
-       * Category
-       */
       if (
         filters.categories.length > 0 &&
         !filters.categories.includes(item.category)
@@ -208,102 +121,80 @@ const TransactionTable = ({ search, filters }: TransactionTableProps) => {
         return false;
       }
 
-      /*
-       * Date
-       */
-      if (!isDateInFilter(item.date, filters)) {
-        return false;
-      }
-
-      /*
-       * Amount
-       */
       if (!isAmountInFilter(item.amount, filters)) {
         return false;
       }
 
       return true;
     });
-  }, [search, filters]);
+  }, [transactions, search, filters]);
+
+  const handleDelete = () => {
+    if (!selectedDeleteTransaction) {
+      return;
+    }
+
+    deleteTransaction(selectedDeleteTransaction.id);
+
+    setSelectedDeleteTransaction(null);
+    setDeleteDialogOpen(false);
+  };
+
+  const handleEditSave = (updated: Transaction) => {
+    updateTransaction(updated);
+
+    setEditDialogOpen(false);
+    setSelectedTransaction(null);
+  };
 
   return (
     <>
       <Card
         className="
-          overflow-hidden
-          border-white/[0.08]
-          bg-white/[0.025]
-          backdrop-blur-2xl
-          shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]
-        "
+        overflow-hidden
+        !border-white/[0.06]
+        !bg-white/[0.015]
+        !backdrop-blur-3xl
+        [&::before]:!from-white/[0.02]
+        [&::before]:!via-transparent
+        [&::before]:!to-transparent
+        hover:!bg-white/[0.015]
+        hover:!border-white/[0.06]
+        hover:!shadow-[0_8px_32px_rgba(0,0,0,0.25)]
+        shadow-[inset_0_1px_0_rgba(255,255,255,0.015)]
+      "
       >
-        {/* Table Header */}
+        {/* Header */}
         <div
           className="
-            grid
-            grid-cols-[2fr_1.15fr_1.15fr_0.75fr_40px]
-            items-center
-            gap-6
-            border-b
-            border-white/[0.06]
-            px-6
-            py-4
-          "
+          grid
+          grid-cols-[2fr_1.15fr_1.15fr_.75fr_40px]
+          items-center
+          gap-6
+          border-b
+          border-white/[0.04]
+          px-6
+          py-4
+        "
         >
-          <span
-            className="
+          {["Transaction", "Category", "Date", "Amount", ""].map((title) => (
+            <span
+              key={title}
+              className="
               text-[11px]
               font-medium
               uppercase
-              tracking-[0.08em]
+              tracking-wider
               text-zinc-600
             "
-          >
-            Transaction
-          </span>
-
-          <span
-            className="
-              text-[11px]
-              font-medium
-              uppercase
-              tracking-[0.08em]
-              text-zinc-600
-            "
-          >
-            Category
-          </span>
-
-          <span
-            className="
-              text-[11px]
-              font-medium
-              uppercase
-              tracking-[0.08em]
-              text-zinc-600
-            "
-          >
-            Date
-          </span>
-
-          <span
-            className="
-              text-right
-              text-[11px]
-              font-medium
-              uppercase
-              tracking-[0.08em]
-              text-zinc-600
-            "
-          >
-            Amount
-          </span>
-
-          <span />
+            >
+              {title}
+            </span>
+          ))}
         </div>
 
-        {/* Table Rows */}
-        <div className="divide-y divide-white/[0.045]">
+        {/* Rows */}
+        <div className="divide-y divide-white/[0.025]">
           {filteredTransactions.map((item) => {
             const Icon = getTransactionIcon(item.category);
 
@@ -311,111 +202,75 @@ const TransactionTable = ({ search, filters }: TransactionTableProps) => {
               <div
                 key={item.id}
                 className="
-                  group
-                  grid
-                  grid-cols-[2fr_1.15fr_1.15fr_0.75fr_40px]
-                  items-center
-                  gap-6
-                  px-6
-                  py-4
-                  hover:bg-white/[0.018]
-                "
+    group
+    grid
+    grid-cols-[2fr_1.15fr_1.15fr_.75fr_40px]
+    items-center
+    gap-6
+    px-6
+    py-4
+    border-b
+    border-white/[0.025]
+    last:border-b-0
+    transition-colors
+    duration-200
+    hover:bg-white/[0.008]
+  "
               >
-                {/* Transaction */}
-                <div className="flex min-w-0 items-center gap-3">
+                <div className="flex items-center gap-3">
                   <div
                     className="
-                      flex
-                      h-9
-                      w-9
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-white/[0.07]
-                      bg-white/[0.025]
-                      text-zinc-500
-                      shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]
-                      transition-all
-                      duration-200
-                      group-hover:border-white/[0.10]
-                      group-hover:bg-white/[0.04]
-                      group-hover:text-zinc-300
-                    "
+                    flex
+                    h-9
+                    w-9
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-white/[0.08]
+                    bg-white/[0.025]
+                    text-zinc-400
+                  "
                   >
-                    <Icon size={16} strokeWidth={1.7} />
+                    <Icon size={16} />
                   </div>
 
-                  <span
-                    className="
-                      min-w-0
-                      truncate
-                      text-sm
-                      font-medium
-                      text-zinc-200
-                      transition-colors
-                      group-hover:text-white
-                    "
-                  >
+                  <span className="truncate text-sm text-zinc-200">
                     {item.name}
                   </span>
                 </div>
 
-                {/* Category */}
-                <div>
-                  <span
-                    className="
-                      inline-flex
-                      items-center
-                      rounded-lg
-                      border
-                      border-white/[0.06]
-                      bg-white/[0.025]
-                      px-2.5
-                      py-1
-                      text-[11px]
-                      font-medium
-                      text-zinc-500
-                      transition-all
-                      duration-200
-                      group-hover:border-white/[0.08]
-                      group-hover:text-zinc-400
-                    "
-                  >
-                    {item.category}
-                  </span>
-                </div>
-
-                {/* Date */}
                 <span
                   className="
-                    text-sm
-                    text-zinc-500
-                    transition-colors
-                    group-hover:text-zinc-400
-                  "
+                  w-fit
+                  rounded-lg
+                  border
+                  border-white/[0.06]
+                  bg-white/[0.025]
+                  px-2
+                  py-1
+                  text-xs
+                  text-zinc-400
+                "
                 >
-                  {item.date}
+                  {item.category}
                 </span>
 
-                {/* Amount */}
+                <span className="text-sm text-zinc-500">{item.date}</span>
+
                 <span
                   className={`
-                    text-right
-                    text-sm
-                    font-semibold
-                    tracking-tight
-                    ${
-                      item.type === "income" ? "text-green-400" : "text-red-400"
-                    }
-                  `}
+                  text-right
+                  text-sm
+                  font-semibold
+                  ${item.type === "income" ? "text-green-400" : "text-red-400"}
+                `}
                 >
                   {item.type === "income" ? "+" : "-"}$
                   {item.amount.toLocaleString()}
                 </span>
 
-                {/* Actions */}
                 <MoreActionsMenu
                   label={`Actions for ${item.name}`}
                   onEdit={() => {
@@ -431,57 +286,58 @@ const TransactionTable = ({ search, filters }: TransactionTableProps) => {
             );
           })}
 
-          {/* Empty State */}
           {filteredTransactions.length === 0 && (
-            <div className="px-6 py-14 text-center">
+            <div
+              className="
+              flex
+              flex-col
+              items-center
+              justify-center
+              py-16
+              text-center
+            "
+            >
               <div
                 className="
-                  mx-auto
-                  flex
-                  h-10
-                  w-10
-                  items-center
-                  justify-center
-                  rounded-xl
-                  border
-                  border-white/[0.07]
-                  bg-white/[0.025]
-                  text-zinc-600
-                "
+                flex
+                h-14
+                w-14
+                items-center
+                justify-center
+                rounded-2xl
+                border
+                border-white/[0.08]
+                bg-white/[0.025]
+                text-zinc-500
+              "
               >
-                <CircleDollarSign size={18} />
+                <CircleDollarSign size={24} />
               </div>
 
-              <p className="mt-3 text-sm font-medium text-zinc-300">
+              <h3 className="mt-4 text-sm font-medium text-zinc-300">
                 No transactions found
-              </p>
+              </h3>
 
               <p className="mt-1 text-xs text-zinc-600">
-                Try adjusting your search or filters.
+                Try changing your filters or add a new transaction.
               </p>
             </div>
           )}
         </div>
       </Card>
 
-      {/* Edit Transaction Dialog */}
       <EditTransactionDialog
         transaction={selectedTransaction}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+        onSave={handleEditSave}
       />
 
-      {/* Delete Transaction Dialog */}
       <DeleteTransactionDialog
         transactionName={selectedDeleteTransaction?.name ?? ""}
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        onConfirm={() => {
-          console.log("Delete:", selectedDeleteTransaction?.id);
-
-          setDeleteDialogOpen(false);
-          setSelectedDeleteTransaction(null);
-        }}
+        onConfirm={handleDelete}
       />
     </>
   );

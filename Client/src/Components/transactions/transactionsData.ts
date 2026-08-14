@@ -9,7 +9,7 @@ export interface Transaction {
   type: TransactionType;
 }
 
-export const transactions: Transaction[] = [
+export const initialTransactions: Transaction[] = [
   {
     id: "1",
     name: "Netflix Subscription",

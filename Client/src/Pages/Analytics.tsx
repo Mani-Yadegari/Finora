@@ -1,30 +1,46 @@
-import SpendingChart from "../components/analytics/SpendingChart";
-import IncomeChart from "../components/analytics/IncomeChart";
-import CategoryCard from "../components/analytics/CategoryCard";
+import AnalyticsHeader from "../components/analytics/AnalyticsHeader";
+import SpendingBreakdown from "../components/analytics/SpendingBreakdown";
+import InsightsCard from "../components/analytics/InsightsCard";
+import TopMerchants from "../components/analytics/TopMerchants";
+import SpendingTrend from "../components/analytics/SpendingTrend";
 
 const Analytics = () => {
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-semibold">Analytics</h2>
+    <div
+      className="
+      relative
+      min-h-full
+      space-y-8
+      overflow-visible
+      "
+    >
+      <AnalyticsHeader />
 
-        <p className="text-zinc-400 mt-2">Understand your financial habits</p>
+      <div
+        className="
+        grid
+        grid-cols-1
+        gap-6
+        xl:grid-cols-2
+        "
+      >
+        <SpendingBreakdown />
+
+        <InsightsCard />
       </div>
 
       <div
         className="
         grid
         grid-cols-1
-        xl:grid-cols-2
         gap-6
-      "
+        xl:grid-cols-2
+        "
       >
-        <SpendingChart />
+        <TopMerchants />
 
-        <IncomeChart />
+        <SpendingTrend />
       </div>
-
-      <CategoryCard />
     </div>
   );
 };

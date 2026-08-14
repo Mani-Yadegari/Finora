@@ -9,7 +9,6 @@ import {
 
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 import {
@@ -33,109 +32,144 @@ import {
   FolderPen,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface Goal {
+  name: string;
+  category: string;
+  targetAmount: number;
+  savedAmount: number;
+  deadline: string;
+}
 
 interface EditGoalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  goal: Goal | null;
+  onSave: (goal: Goal) => void;
 }
 
-const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
-  const [amount, setAmount] = useState(30000);
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
+const categories = [
+  { name: "Home", icon: House },
+  { name: "Travel", icon: Plane },
+  { name: "Transportation", icon: Car },
+  { name: "Education", icon: GraduationCap },
+  { name: "Technology", icon: Laptop },
+  { name: "Health", icon: HeartPulse },
+  { name: "Investment", icon: TrendingUp },
+  { name: "Savings", icon: PiggyBank },
+  { name: "Shopping", icon: ShoppingBag },
+  { name: "Events", icon: PartyPopper },
+  { name: "Entertainment", icon: Gamepad2 },
+  { name: "Other", icon: Package },
+];
+
+const EditGoalDialog = ({
+  open,
+  onOpenChange,
+  goal,
+  onSave,
+}: EditGoalDialogProps) => {
   const currentYear = new Date().getFullYear();
 
+  const isCreating = !goal;
+
+  const [name, setName] = useState("");
+  const [amount, setAmount] = useState(0);
+  const [category, setCategory] = useState("");
+  const [deadline, setDeadline] = useState("");
+
   const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState("");
 
-  const [selectedMonth, setSelectedMonth] = useState("October");
-
-  const [deadline, setDeadline] = useState(`October ${currentYear}`);
-
-  const [category, setCategory] = useState("Travel");
   const [categoryOpen, setCategoryOpen] = useState(false);
-
   const [deadlineOpen, setDeadlineOpen] = useState(false);
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  useEffect(() => {
+    if (!open) return;
 
-  const categories = [
-    {
-      name: "Home",
-      icon: House,
-    },
-    {
-      name: "Travel",
-      icon: Plane,
-    },
-    {
-      name: "Transportation",
-      icon: Car,
-    },
-    {
-      name: "Education",
-      icon: GraduationCap,
-    },
-    {
-      name: "Technology",
-      icon: Laptop,
-    },
-    {
-      name: "Health",
-      icon: HeartPulse,
-    },
-    {
-      name: "Investment",
-      icon: TrendingUp,
-    },
-    {
-      name: "Savings",
-      icon: PiggyBank,
-    },
-    {
-      name: "Shopping",
-      icon: ShoppingBag,
-    },
-    {
-      name: "Events",
-      icon: PartyPopper,
-    },
-    {
-      name: "Entertainment",
-      icon: Gamepad2,
-    },
-    {
-      name: "Other",
-      icon: Package,
-    },
-  ];
+    if (goal) {
+      // Edit mode
+      setName(goal.name);
+      setAmount(goal.targetAmount);
+      setCategory(goal.category);
+      setDeadline(goal.deadline);
+
+      const parts = goal.deadline.split(" ");
+
+      if (parts.length === 2) {
+        setSelectedMonth(parts[0]);
+        setSelectedYear(Number(parts[1]));
+      }
+    } else {
+      // Create mode
+      setName("");
+      setAmount(0);
+      setCategory("");
+      setDeadline("");
+      setSelectedYear(currentYear);
+      setSelectedMonth("");
+    }
+  }, [open, goal, currentYear]);
 
   const increaseAmount = () => {
     setAmount((prev) => prev + 1000);
   };
 
   const decreaseAmount = () => {
-    setAmount((prev) => Math.max(1000, prev - 1000));
+    setAmount((prev) => Math.max(0, prev - 1000));
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
 
+    if (value === "") {
+      setAmount(0);
+      return;
+    }
+
     if (!isNaN(Number(value))) {
       setAmount(Number(value));
     }
+  };
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+    if (!category) return;
+    if (amount < 1000) return;
+    if (!deadline) return;
+
+    const savedGoal: Goal = {
+      ...(goal ?? {
+        name: "",
+        category: "",
+        targetAmount: 0,
+        savedAmount: 0,
+        deadline: "",
+      }),
+
+      name: name.trim(),
+      category,
+      targetAmount: amount,
+      deadline,
+    };
+
+    onSave(savedGoal);
   };
 
   const inputStyle = `
@@ -164,7 +198,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
         className="
           w-full
           max-w-[420px]
-          overflow-hidden
+          overflow-visible
           rounded-3xl
           border
           border-white/10
@@ -175,11 +209,13 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
           shadow-[0_25px_100px_rgba(0,0,0,0.7)]
         "
       >
+        {/* Glows */}
         <div
           className="
+            pointer-events-none
             absolute
+            -right-24
             -top-24
-            right-10
             h-48
             w-48
             rounded-full
@@ -190,9 +226,10 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
 
         <div
           className="
+            pointer-events-none
             absolute
             -bottom-24
-            left-10
+            -left-24
             h-40
             w-40
             rounded-full
@@ -228,7 +265,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               tracking-tight
             "
           >
-            Edit Financial Goal
+            {isCreating ? "Create Financial Goal" : "Edit Financial Goal"}
           </DialogTitle>
 
           <DialogDescription
@@ -238,7 +275,9 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               text-zinc-400
             "
           >
-            Update your saving target and deadline.
+            {isCreating
+              ? "Create a savings target and start tracking your progress."
+              : "Update your saving target and deadline."}
           </DialogDescription>
         </DialogHeader>
 
@@ -262,14 +301,18 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               />
 
               <Input
-                defaultValue="Dream Vacation"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Dream Vacation"
                 className={`
                   ${inputStyle}
                   pl-10
+                  placeholder:text-zinc-600
                 `}
               />
             </div>
-          </div>{" "}
+          </div>
+
           {/* Category */}
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-wider text-zinc-500">
@@ -279,6 +322,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
             <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
               <PopoverTrigger asChild>
                 <button
+                  type="button"
                   className="
                     flex
                     h-12
@@ -290,25 +334,18 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                     bg-white/[0.04]
                     px-3
                     text-sm
-                    text-white
                     transition-all
                     duration-300
                     hover:border-white/20
-                    focus:ring-4
-                    focus:ring-green-400/10
                   "
                 >
                   {CategoryIcon && (
-                    <CategoryIcon
-                      size={16}
-                      className="
-                        mr-3
-                        text-green-400
-                      "
-                    />
+                    <CategoryIcon size={16} className="mr-3 text-green-400" />
                   )}
 
-                  {category}
+                  <span className={category ? "text-white" : "text-zinc-600"}>
+                    {category || "Select category"}
+                  </span>
                 </button>
               </PopoverTrigger>
 
@@ -332,6 +369,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
 
                     return (
                       <button
+                        type="button"
                         key={item.name}
                         onClick={() => {
                           setCategory(item.name);
@@ -355,7 +393,6 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                         `}
                       >
                         <Icon size={15} />
-
                         {item.name}
                       </button>
                     );
@@ -364,6 +401,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               </PopoverContent>
             </Popover>
           </div>
+
           {/* Amount */}
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-wider text-zinc-500">
@@ -388,28 +426,23 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                 focus-within:ring-green-400/10
               "
             >
-              <Wallet
-                size={16}
-                className="
-                  ml-3
-                  shrink-0
-                  text-zinc-500
-                "
-              />
+              <Wallet size={16} className="ml-3 shrink-0 text-zinc-500" />
 
               <input
-                value={amount.toLocaleString()}
+                value={amount === 0 ? "" : amount.toLocaleString()}
                 onChange={handleAmountChange}
+                placeholder="0"
                 className="
-                  h-95
+                  h-full
+                  min-w-0
                   flex-1
                   bg-transparent
                   px-3
                   text-sm
                   text-white
                   outline-none
+                  placeholder:text-zinc-600
                 "
-                required
               />
 
               <div className="flex gap-1 pr-2">
@@ -458,6 +491,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               </div>
             </div>
           </div>
+
           {/* Deadline */}
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-wider text-zinc-500">
@@ -467,6 +501,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
             <Popover open={deadlineOpen} onOpenChange={setDeadlineOpen}>
               <PopoverTrigger asChild>
                 <button
+                  type="button"
                   className="
                     flex
                     h-12
@@ -478,21 +513,16 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                     bg-white/[0.04]
                     px-3
                     text-sm
-                    text-white
                     transition-all
                     duration-300
                     hover:border-white/20
                   "
                 >
-                  <CalendarDays
-                    size={16}
-                    className="
-                      mr-3
-                      text-zinc-500
-                    "
-                  />
+                  <CalendarDays size={16} className="mr-3 text-zinc-500" />
 
-                  {deadline}
+                  <span className={deadline ? "text-white" : "text-zinc-600"}>
+                    {deadline || "Select deadline"}
+                  </span>
                 </button>
               </PopoverTrigger>
 
@@ -508,6 +538,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                   backdrop-blur-xl
                 "
               >
+                {/* Year */}
                 <div className="mb-5">
                   <p className="mb-3 text-xs text-zinc-500">Select year</p>
 
@@ -525,11 +556,47 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                     "
                   >
                     <button
+                      type="button"
+                      disabled={selectedYear <= currentYear}
                       onClick={() => {
                         const year = selectedYear - 1;
 
                         if (year >= currentYear) {
                           setSelectedYear(year);
+
+                          if (selectedMonth) {
+                            setDeadline(`${selectedMonth} ${year}`);
+                          }
+                        }
+                      }}
+                      className="
+                        flex
+                        h-7
+                        w-7
+                        items-center
+                        justify-center
+                        rounded-lg
+                        text-zinc-400
+                        transition
+                        hover:bg-white/10
+                        hover:text-white
+                        disabled:pointer-events-none
+                        disabled:opacity-30
+                      "
+                    >
+                      ←
+                    </button>
+
+                    <span className="text-sm font-medium">{selectedYear}</span>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const year = selectedYear + 1;
+
+                        setSelectedYear(year);
+
+                        if (selectedMonth) {
                           setDeadline(`${selectedMonth} ${year}`);
                         }
                       }}
@@ -541,31 +608,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                         justify-center
                         rounded-lg
                         text-zinc-400
-                        hover:bg-white/10
-                        hover:text-white
-                      "
-                    >
-                      ←
-                    </button>
-
-                    <span className="text-sm font-medium">{selectedYear}</span>
-
-                    <button
-                      onClick={() => {
-                        const year = selectedYear + 1;
-
-                        setSelectedYear(year);
-
-                        setDeadline(`${selectedMonth} ${year}`);
-                      }}
-                      className="
-                        flex
-                        h-7
-                        w-7
-                        items-center
-                        justify-center
-                        rounded-lg
-                        text-zinc-400
+                        transition
                         hover:bg-white/10
                         hover:text-white
                       "
@@ -575,17 +618,17 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
                   </div>
                 </div>
 
+                {/* Month */}
                 <p className="mb-3 text-xs text-zinc-500">Select month</p>
 
                 <div className="grid grid-cols-3 gap-2">
                   {months.map((month) => (
                     <button
+                      type="button"
                       key={month}
                       onClick={() => {
                         setSelectedMonth(month);
-
                         setDeadline(`${month} ${selectedYear}`);
-
                         setDeadlineOpen(false);
                       }}
                       className={`
@@ -611,6 +654,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
           </div>
         </div>
 
+        {/* Footer */}
         <DialogFooter
           className="
             relative
@@ -620,6 +664,7 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
           "
         >
           <Button
+            type="button"
             variant="ghost"
             onClick={() => onOpenChange(false)}
             className="
@@ -637,7 +682,9 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
           </Button>
 
           <Button
-            onClick={() => onOpenChange(false)}
+            type="button"
+            onClick={handleSave}
+            disabled={!name.trim() || !category || amount < 1000 || !deadline}
             className="
               h-11
               flex-1
@@ -647,9 +694,11 @@ const EditGoalDialog = ({ open, onOpenChange }: EditGoalDialogProps) => {
               text-black
               shadow-[0_0_25px_rgba(74,222,128,0.35)]
               hover:bg-green-300
+              disabled:pointer-events-none
+              disabled:opacity-50
             "
           >
-            Save Goal
+            {isCreating ? "Create Goal" : "Save Goal"}
           </Button>
         </DialogFooter>
       </DialogContent>

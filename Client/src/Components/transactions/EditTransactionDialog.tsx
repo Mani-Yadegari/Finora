@@ -38,14 +38,8 @@ import {
 
 import { useEffect, useState } from "react";
 
-interface Transaction {
-  id: string;
-  name: string;
-  category: string;
-  date: string;
-  amount: number;
-  type: "income" | "expense";
-}
+import { useTransactions } from "./TransactionsContext";
+import type { Transaction } from "./transactionsData";
 
 interface EditTransactionDialogProps {
   transaction: Transaction | null;
@@ -53,11 +47,44 @@ interface EditTransactionDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const categories = [
+  { name: "Home", icon: House },
+  { name: "Travel", icon: Plane },
+  { name: "Transportation", icon: Car },
+  { name: "Education", icon: GraduationCap },
+  { name: "Technology", icon: Laptop },
+  { name: "Health", icon: HeartPulse },
+  { name: "Investment", icon: TrendingUp },
+  { name: "Savings", icon: PiggyBank },
+  { name: "Shopping", icon: ShoppingBag },
+  { name: "Events", icon: PartyPopper },
+  { name: "Entertainment", icon: Gamepad2 },
+  { name: "Food", icon: Utensils },
+  { name: "Other", icon: Package },
+];
+
 const EditTransactionDialog = ({
   transaction,
   open,
   onOpenChange,
 }: EditTransactionDialogProps) => {
+  const { updateTransaction } = useTransactions();
+
   const [name, setName] = useState("");
   const [amount, setAmount] = useState(0);
 
@@ -70,43 +97,20 @@ const EditTransactionDialog = ({
   const [date, setDate] = useState("");
   const [dateOpen, setDateOpen] = useState(false);
 
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  const [selectedMonth, setSelectedMonth] = useState(
+    months[new Date().getMonth()],
+  );
+
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+
   const currentYear = new Date().getFullYear();
 
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [selectedMonth, setSelectedMonth] = useState("August");
-  const [selectedDay, setSelectedDay] = useState(1);
-
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const categories = [
-    { name: "Home", icon: House },
-    { name: "Travel", icon: Plane },
-    { name: "Transportation", icon: Car },
-    { name: "Education", icon: GraduationCap },
-    { name: "Technology", icon: Laptop },
-    { name: "Health", icon: HeartPulse },
-    { name: "Investment", icon: TrendingUp },
-    { name: "Savings", icon: PiggyBank },
-    { name: "Shopping", icon: ShoppingBag },
-    { name: "Events", icon: PartyPopper },
-    { name: "Entertainment", icon: Gamepad2 },
-    { name: "Food", icon: Utensils },
-    { name: "Other", icon: Package },
-  ];
-
+  /*
+   * وقتی transaction انتخاب می‌شود،
+   * اطلاعات آن را داخل فرم قرار می‌دهیم.
+   */
   useEffect(() => {
     if (!transaction) return;
 
@@ -116,10 +120,9 @@ const EditTransactionDialog = ({
     setType(transaction.type);
     setDate(transaction.date);
 
-    // Sync date picker with transaction date
     const parsedDate = new Date(transaction.date);
 
-    if (!isNaN(parsedDate.getTime())) {
+    if (!Number.isNaN(parsedDate.getTime())) {
       setSelectedYear(parsedDate.getFullYear());
       setSelectedMonth(months[parsedDate.getMonth()]);
       setSelectedDay(parsedDate.getDate());
@@ -131,15 +134,24 @@ const EditTransactionDialog = ({
   };
 
   const decreaseAmount = () => {
-    setAmount((prev) => Math.max(1, prev - 100));
+    setAmount((prev) => Math.max(0, prev - 100));
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
 
-    if (!isNaN(Number(value))) {
+    if (value === "") {
+      setAmount(0);
+      return;
+    }
+
+    if (!Number.isNaN(Number(value))) {
       setAmount(Number(value));
     }
+  };
+
+  const formatDate = (month: string, day: number, year: number) => {
+    return `${month.slice(0, 3)} ${String(day).padStart(2, "0")}, ${year}`;
   };
 
   const handleToday = () => {
@@ -153,10 +165,42 @@ const EditTransactionDialog = ({
     setSelectedMonth(month);
     setSelectedDay(day);
 
-    setDate(`${month.slice(0, 3)} ${String(day).padStart(2, "0")}, ${year}`);
+    setDate(formatDate(month, day, year));
 
     setDateOpen(false);
   };
+
+  /*
+   * این قسمت اصلی اصلاح است.
+   *
+   * قبلاً فقط console.log داشتی.
+   * الان transaction جدید ساخته می‌شود و
+   * updateTransaction داخل Context اجرا می‌شود.
+   */
+  const handleSave = () => {
+    if (!transaction) return;
+
+    if (!name.trim()) return;
+
+    if (amount <= 0) return;
+
+    const updatedTransaction: Transaction = {
+      id: transaction.id,
+      name: name.trim(),
+      category,
+      type,
+      amount,
+      date,
+    };
+
+    updateTransaction(updatedTransaction);
+
+    onOpenChange(false);
+  };
+
+  const selectedCategory = categories.find((item) => item.name === category);
+
+  const CategoryIcon = selectedCategory?.icon;
 
   const inputStyle = `
     h-11
@@ -173,23 +217,6 @@ const EditTransactionDialog = ({
     focus-visible:ring-green-400/10
     focus-visible:bg-white/[0.06]
   `;
-
-  const selectedCategory = categories.find((item) => item.name === category);
-
-  const CategoryIcon = selectedCategory?.icon;
-
-  const handleSave = () => {
-    console.log({
-      id: transaction?.id,
-      name,
-      category,
-      type,
-      amount,
-      date,
-    });
-
-    onOpenChange(false);
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -250,7 +277,7 @@ const EditTransactionDialog = ({
         </DialogHeader>
 
         <div className="relative mt-5 space-y-4">
-          {/* Transaction Name */}
+          {/* Name */}
           <div className="space-y-1.5">
             <label className="text-xs uppercase tracking-wider text-zinc-500">
               Transaction Name
@@ -742,11 +769,7 @@ const EditTransactionDialog = ({
                         onClick={() => {
                           setSelectedDay(day);
 
-                          setDate(
-                            `${selectedMonth.slice(0, 3)} ${String(
-                              day,
-                            ).padStart(2, "0")}, ${selectedYear}`,
-                          );
+                          setDate(formatDate(selectedMonth, day, selectedYear));
 
                           setDateOpen(false);
                         }}
@@ -776,6 +799,7 @@ const EditTransactionDialog = ({
           </div>
         </div>
 
+        {/* Footer */}
         <DialogFooter className="relative mt-6 flex gap-3">
           <Button
             variant="ghost"
@@ -796,6 +820,7 @@ const EditTransactionDialog = ({
 
           <Button
             onClick={handleSave}
+            disabled={!name.trim() || amount <= 0 || !transaction}
             className="
               h-10
               flex-1
@@ -805,6 +830,8 @@ const EditTransactionDialog = ({
               text-black
               shadow-[0_0_25px_rgba(74,222,128,0.35)]
               hover:bg-green-300
+              disabled:cursor-not-allowed
+              disabled:opacity-40
             "
           >
             Save Changes
