@@ -36,6 +36,7 @@ const Transactions = () => {
     <div
       className="
       relative
+      min-h-full
       space-y-6
       overflow-hidden
       rounded-3xl

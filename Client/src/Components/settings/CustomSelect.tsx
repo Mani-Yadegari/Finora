@@ -181,7 +181,7 @@ const CustomSelect = ({ value, onChange, options }: CustomSelectProps) => {
 
   return (
     <>
-      <div className="relative z-[10] shrink-0">
+      <div className="relative z-10 shrink-0">
         <button
           ref={triggerRef}
           type="button"

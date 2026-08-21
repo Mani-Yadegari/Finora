@@ -12,6 +12,7 @@ import {
   Shield,
   Trash2,
   ChevronRight,
+  Check,
 } from "lucide-react";
 
 import SettingsCard from "../components/settings/SettingsCard";
@@ -24,28 +25,33 @@ import NotificationRow from "../components/settings/NotificationRow";
 import SettingsSaveBar, {
   type FeedbackState,
 } from "../components/settings/SettingsSaveBar";
+import DeleteAccountDialog from "../components/settings/DeleteAccountDialog";
+import ChangeEmailDialog from "../components/settings/ChangeEmailDialog";
+import ChangePasswordDialog from "../components/settings/ChangePasswordDialog";
 
 type NotificationKey = "budget" | "transactions" | "summary";
 
-type SettingsState = {
+type ProfileState = {
   fullName: string;
   email: string;
+};
+
+type SettingsState = {
   theme: "dark" | "light";
   currency: "USD" | "EUR";
   dateFormat: "DD/MM/YYYY" | "MM/DD/YYYY" | "YYYY-MM-DD";
   notifications: Record<NotificationKey, boolean>;
 };
 
-const initialSettings: SettingsState = {
+const initialProfile: ProfileState = {
   fullName: "Mani Yadegari",
   email: "mani@example.com",
+};
 
+const initialSettings: SettingsState = {
   theme: "dark",
-
   currency: "USD",
-
   dateFormat: "DD/MM/YYYY",
-
   notifications: {
     budget: true,
     transactions: true,
@@ -54,6 +60,37 @@ const initialSettings: SettingsState = {
 };
 
 const Settings = () => {
+  /* ---------------------------------------------------------------------- */
+  /* Profile state                                                          */
+  /* ---------------------------------------------------------------------- */
+
+  const [profile, setProfile] = useState<ProfileState>(initialProfile);
+
+  const [savedProfile, setSavedProfile] =
+    useState<ProfileState>(initialProfile);
+
+  const [profileFeedback, setProfileFeedback] = useState<
+    "idle" | "saved" | "error"
+  >("idle");
+
+  const [profileSaveAnimating, setProfileSaveAnimating] = useState(false);
+
+  /* ---------------------------------------------------------------------- */
+  /* Change email dialog                                                    */
+  /* ---------------------------------------------------------------------- */
+
+  const [changeEmailOpen, setChangeEmailOpen] = useState(false);
+
+  /* ---------------------------------------------------------------------- */
+  /* Change password dialog                                                 */
+  /* ---------------------------------------------------------------------- */
+
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+
+  /* ---------------------------------------------------------------------- */
+  /* General settings state                                                 */
+  /* ---------------------------------------------------------------------- */
+
   const [settings, setSettings] = useState<SettingsState>(initialSettings);
 
   const [savedSettings, setSavedSettings] =
@@ -62,13 +99,133 @@ const Settings = () => {
   const [feedback, setFeedback] = useState<FeedbackState>("idle");
 
   /* ---------------------------------------------------------------------- */
-  /* Detect changes                                                         */
+  /* Delete account dialog                                                  */
+  /* ---------------------------------------------------------------------- */
+
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+
+  /* ---------------------------------------------------------------------- */
+  /* Detect profile changes                                                 */
+  /* ---------------------------------------------------------------------- */
+
+  const profileHasChanges =
+    JSON.stringify(profile) !== JSON.stringify(savedProfile);
+
+  /* ---------------------------------------------------------------------- */
+  /* Detect general settings changes                                        */
   /* ---------------------------------------------------------------------- */
 
   const hasChanges = JSON.stringify(settings) !== JSON.stringify(savedSettings);
 
   /* ---------------------------------------------------------------------- */
-  /* Saved animation lifecycle                                              */
+  /* Update profile                                                         */
+  /* ---------------------------------------------------------------------- */
+
+  const updateProfile = <K extends keyof ProfileState>(
+    key: K,
+    value: ProfileState[K],
+  ) => {
+    setProfile((previous) => ({
+      ...previous,
+      [key]: value,
+    }));
+
+    if (profileFeedback !== "idle") {
+      setProfileFeedback("idle");
+    }
+  };
+
+  /* ---------------------------------------------------------------------- */
+  /* Profile save                                                           */
+  /* ---------------------------------------------------------------------- */
+
+  const handleProfileSave = () => {
+    if (!profileHasChanges || profileSaveAnimating) return;
+
+    const trimmedName = profile.fullName.trim();
+    const trimmedEmail = profile.email.trim();
+
+    if (!trimmedName || !trimmedEmail) {
+      setProfileFeedback("error");
+      return;
+    }
+
+    if (!trimmedEmail.includes("@")) {
+      setProfileFeedback("error");
+      return;
+    }
+
+    /* Email changed */
+    if (trimmedEmail !== savedProfile.email) {
+      console.log("====================================");
+      console.log("FINORA EMAIL CHANGE REQUEST");
+      console.log("Old email:", savedProfile.email);
+      console.log("New email:", trimmedEmail);
+      console.log("Opening email verification dialog...");
+      console.log("====================================");
+
+      setChangeEmailOpen(true);
+
+      return;
+    }
+
+    /* Only name changed */
+    setSavedProfile({
+      fullName: trimmedName,
+      email: savedProfile.email,
+    });
+
+    setProfile({
+      fullName: trimmedName,
+      email: savedProfile.email,
+    });
+
+    setProfileSaveAnimating(true);
+
+    window.setTimeout(() => {
+      setProfileSaveAnimating(false);
+    }, 1800);
+  };
+
+  /* ---------------------------------------------------------------------- */
+  /* Confirm email change                                                   */
+  /* ---------------------------------------------------------------------- */
+
+  const handleEmailChangeConfirm = () => {
+    const trimmedName = profile.fullName.trim();
+    const trimmedEmail = profile.email.trim();
+
+    setSavedProfile({
+      fullName: trimmedName,
+      email: trimmedEmail,
+    });
+
+    setProfile({
+      fullName: trimmedName,
+      email: trimmedEmail,
+    });
+
+    setProfileFeedback("idle");
+
+    console.log("====================================");
+    console.log("FINORA EMAIL CHANGED SUCCESSFULLY");
+    console.log("Old email:", savedProfile.email);
+    console.log("New email:", trimmedEmail);
+    console.log("====================================");
+  };
+
+  /* ---------------------------------------------------------------------- */
+  /* Confirm password change                                                */
+  /* ---------------------------------------------------------------------- */
+
+  const handlePasswordChangeConfirm = () => {
+    console.log("====================================");
+    console.log("FINORA PASSWORD CHANGED SUCCESSFULLY");
+    console.log("====================================");
+  };
+
+  /* ---------------------------------------------------------------------- */
+  /* General settings feedback lifecycle                                    */
   /* ---------------------------------------------------------------------- */
 
   useEffect(() => {
@@ -96,7 +253,7 @@ const Settings = () => {
   }, [feedback]);
 
   /* ---------------------------------------------------------------------- */
-  /* Update setting                                                         */
+  /* Update general setting                                                 */
   /* ---------------------------------------------------------------------- */
 
   const updateSetting = <K extends keyof SettingsState>(
@@ -120,7 +277,6 @@ const Settings = () => {
   const updateNotification = (key: NotificationKey, value: boolean) => {
     setSettings((previous) => ({
       ...previous,
-
       notifications: {
         ...previous.notifications,
         [key]: value,
@@ -133,7 +289,7 @@ const Settings = () => {
   };
 
   /* ---------------------------------------------------------------------- */
-  /* Save                                                                    */
+  /* Save general settings                                                  */
   /* ---------------------------------------------------------------------- */
 
   const handleSave = () => {
@@ -141,7 +297,6 @@ const Settings = () => {
 
     setSavedSettings({
       ...settings,
-
       notifications: {
         ...settings.notifications,
       },
@@ -151,19 +306,26 @@ const Settings = () => {
   };
 
   /* ---------------------------------------------------------------------- */
-  /* Discard                                                                 */
+  /* Discard general settings                                               */
   /* ---------------------------------------------------------------------- */
 
   const handleDiscard = () => {
     setSettings({
       ...savedSettings,
-
       notifications: {
         ...savedSettings.notifications,
       },
     });
 
     setFeedback("idle");
+  };
+
+  /* ---------------------------------------------------------------------- */
+  /* Delete account                                                         */
+  /* ---------------------------------------------------------------------- */
+
+  const handleDeleteAccount = () => {
+    setDeleteAccountOpen(false);
   };
 
   return (
@@ -181,6 +343,7 @@ const Settings = () => {
             flex
             flex-col
             gap-6
+            overflow-hidden
             rounded-3xl
             border
             border-white/[0.08]
@@ -189,7 +352,6 @@ const Settings = () => {
             backdrop-blur-3xl
           "
         >
-          {/* Green glow */}
           <div
             className="
               pointer-events-none
@@ -205,7 +367,6 @@ const Settings = () => {
           />
 
           <div className="relative flex items-center gap-4">
-            {/* Icon */}
             <div
               className="
                 flex
@@ -224,7 +385,6 @@ const Settings = () => {
               <Settings2 size={21} />
             </div>
 
-            {/* Title */}
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-semibold text-white">Settings</h1>
@@ -291,7 +451,7 @@ const Settings = () => {
                         text-green-400
                       "
                     >
-                      {settings.fullName.charAt(0).toUpperCase() || "M"}
+                      {profile.fullName.charAt(0).toUpperCase() || "M"}
                     </div>
 
                     <span
@@ -311,7 +471,7 @@ const Settings = () => {
 
                   <div>
                     <p className="text-sm font-medium text-white">
-                      {settings.fullName || "Your name"}
+                      {profile.fullName || "Your name"}
                     </p>
 
                     <p className="mt-1 text-xs text-white/35">
@@ -350,17 +510,125 @@ const Settings = () => {
                 <InputField
                   label="Full name"
                   icon={<User size={16} />}
-                  value={settings.fullName}
-                  onChange={(value) => updateSetting("fullName", value)}
+                  value={profile.fullName}
+                  onChange={(value) => updateProfile("fullName", value)}
                 />
 
                 <InputField
                   label="Email address"
                   icon={<Mail size={16} />}
                   type="email"
-                  value={settings.email}
-                  onChange={(value) => updateSetting("email", value)}
+                  value={profile.email}
+                  onChange={(value) => updateProfile("email", value)}
                 />
+              </div>
+
+              {/* Profile Save */}
+              <div
+                className="
+                  flex
+                  flex-col
+                  gap-3
+                  border-t
+                  border-white/[0.06]
+                  pt-4
+                  sm:flex-row
+                  sm:items-center
+                  sm:justify-end
+                "
+              >
+                <button
+                  type="button"
+                  disabled={!profileHasChanges || profileSaveAnimating}
+                  onClick={handleProfileSave}
+                  className={`
+                    relative
+                    flex
+                    min-w-[135px]
+                    items-center
+                    justify-center
+                    overflow-hidden
+                    rounded-xl
+                    px-4
+                    py-2.5
+                    text-sm
+                    font-medium
+                    transition-all
+                    duration-300
+                    ${
+                      profileSaveAnimating
+                        ? `
+                          bg-green-500
+                          text-black
+                          shadow-[0_0_30px_rgba(34,197,94,0.25)]
+                        `
+                        : profileHasChanges
+                          ? `
+                            bg-green-500
+                            text-black
+                            hover:bg-green-400
+                            active:scale-[0.98]
+                          `
+                          : `
+                            cursor-not-allowed
+                            bg-white/[0.05]
+                            text-white/20
+                          `
+                    }
+                  `}
+                >
+                  <span
+                    className={`
+                      flex
+                      items-center
+                      gap-2
+                      transition-all
+                      duration-300
+                      ${
+                        profileSaveAnimating
+                          ? "-translate-y-8 opacity-0"
+                          : "translate-y-0 opacity-100"
+                      }
+                    `}
+                  >
+                    Save changes
+                  </span>
+
+                  <span
+                    className={`
+                      absolute
+                      flex
+                      items-center
+                      gap-2
+                      transition-all
+                      duration-300
+                      ${
+                        profileSaveAnimating
+                          ? "translate-y-0 opacity-100"
+                          : "translate-y-8 opacity-0"
+                      }
+                    `}
+                  >
+                    <span
+                      className="
+                        flex
+                        h-5
+                        w-5
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-black/10
+                      "
+                    >
+                      <Check
+                        size={13}
+                        strokeWidth={3}
+                        className="animate-[checkmark_.35s_ease-out]"
+                      />
+                    </span>
+                    Saved
+                  </span>
+                </button>
               </div>
             </div>
           </SettingsCard>
@@ -387,7 +655,6 @@ const Settings = () => {
                 bg-black/[0.12]
               "
             >
-              {/* Currency */}
               <PreferenceRow
                 icon={<Wallet size={16} />}
                 title="Currency"
@@ -411,7 +678,6 @@ const Settings = () => {
                 />
               </PreferenceRow>
 
-              {/* Date */}
               <PreferenceRow
                 icon={<CalendarDays size={16} />}
                 title="Date format"
@@ -548,6 +814,7 @@ const Settings = () => {
           >
             <button
               type="button"
+              onClick={() => setChangePasswordOpen(true)}
               className="
                 group
                 flex
@@ -557,15 +824,17 @@ const Settings = () => {
                 gap-5
                 rounded-2xl
                 border
-                border-white/[0.065]
-                bg-black/[0.12]
+                border-white/[0.09]
+                bg-white/[0.025]
                 px-4
                 py-4
                 text-left
                 transition-all
                 duration-200
-                hover:border-white/[0.11]
-                hover:bg-white/[0.025]
+                hover:border-green-400/20
+                hover:bg-white/[0.045]
+                hover:shadow-[0_0_30px_rgba(74,222,128,0.04)]
+                active:scale-[0.995]
               "
             >
               <div className="flex items-center gap-3">
@@ -578,9 +847,13 @@ const Settings = () => {
                     justify-center
                     rounded-xl
                     border
-                    border-green-500/10
-                    bg-green-500/[0.07]
+                    border-green-400/15
+                    bg-green-400/[0.09]
                     text-green-400
+                    transition-all
+                    duration-200
+                    group-hover:border-green-400/25
+                    group-hover:bg-green-400/[0.13]
                   "
                 >
                   <Shield size={16} />
@@ -589,7 +862,7 @@ const Settings = () => {
                 <div>
                   <p className="text-sm font-medium text-white">Password</p>
 
-                  <p className="mt-1 text-xs text-white/30">
+                  <p className="mt-1 text-xs text-white/40">
                     Change your account password
                   </p>
                 </div>
@@ -600,14 +873,18 @@ const Settings = () => {
                   flex
                   items-center
                   gap-2
-                  text-white/25
-                  transition
-                  group-hover:text-white/50
+                  text-white/45
+                  transition-all
+                  duration-200
+                  group-hover:text-green-400
                 "
               >
                 <span className="hidden text-xs sm:block">Change password</span>
 
-                <ChevronRight size={16} />
+                <ChevronRight
+                  size={16}
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                />
               </div>
             </button>
           </SettingsCard>
@@ -650,6 +927,7 @@ const Settings = () => {
 
               <button
                 type="button"
+                onClick={() => setDeleteAccountOpen(true)}
                 className="
                   flex
                   shrink-0
@@ -682,7 +960,7 @@ const Settings = () => {
       </div>
 
       {/* ================================================================ */}
-      {/* Save Bar                                                         */}
+      {/* General Settings Save Bar                                        */}
       {/* ================================================================ */}
 
       <SettingsSaveBar
@@ -690,6 +968,38 @@ const Settings = () => {
         feedback={feedback}
         onSave={handleSave}
         onDiscard={handleDiscard}
+      />
+
+      {/* ================================================================ */}
+      {/* Change Email Dialog                                               */}
+      {/* ================================================================ */}
+
+      <ChangeEmailDialog
+        open={changeEmailOpen}
+        onOpenChange={setChangeEmailOpen}
+        oldEmail={savedProfile.email}
+        newEmail={profile.email.trim()}
+        onConfirm={handleEmailChangeConfirm}
+      />
+
+      {/* ================================================================ */}
+      {/* Change Password Dialog                                            */}
+      {/* ================================================================ */}
+
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
+        onConfirm={handlePasswordChangeConfirm}
+      />
+
+      {/* ================================================================ */}
+      {/* Delete Account Dialog                                             */}
+      {/* ================================================================ */}
+
+      <DeleteAccountDialog
+        open={deleteAccountOpen}
+        onOpenChange={setDeleteAccountOpen}
+        onConfirm={handleDeleteAccount}
       />
     </>
   );

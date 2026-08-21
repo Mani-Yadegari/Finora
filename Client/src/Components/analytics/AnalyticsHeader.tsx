@@ -47,7 +47,7 @@ const AnalyticsHeader = () => {
       lg:justify-between
       rounded-3xl
       border
-      border-white/[0.08]
+      border-white/8
       bg-white/[0.035]
       p-6
       backdrop-blur-3xl
