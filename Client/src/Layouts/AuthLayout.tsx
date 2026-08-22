@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, useOutlet } from "react-router-dom";
+
 import Logo from "../assets/Icons/Logo.webp";
 
 const AuthLayout = () => {
@@ -9,11 +10,21 @@ const AuthLayout = () => {
   const isSignUp = location.pathname === "/signup";
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-[#050806] text-white">
+    <div className="h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
       {/* Ambient Background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        {/* Top Left Glow */}
         <motion.div
-          className="absolute -left-32 -top-32 h-[420px] w-[420px] rounded-full bg-emerald-500/[0.07] blur-[120px]"
+          className="
+            absolute
+            -left-32
+            -top-32
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-[var(--primary)]/[0.055]
+            blur-[120px]
+          "
           animate={{
             x: isSignUp ? 80 : 0,
             y: isSignUp ? 40 : 0,
@@ -24,8 +35,18 @@ const AuthLayout = () => {
           }}
         />
 
+        {/* Bottom Right Glow */}
         <motion.div
-          className="absolute -bottom-40 -right-32 h-[500px] w-[500px] rounded-full bg-emerald-400/[0.05] blur-[140px]"
+          className="
+            absolute
+            -bottom-40
+            -right-32
+            h-[500px]
+            w-[500px]
+            rounded-full
+            bg-[var(--primary)]/[0.035]
+            blur-[140px]
+          "
           animate={{
             x: isSignUp ? -60 : 0,
             y: isSignUp ? -30 : 0,
@@ -36,7 +57,23 @@ const AuthLayout = () => {
           }}
         />
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.035),transparent_55%)]" />
+        {/* Center Glow */}
+        <div
+          className="
+            absolute
+            inset-0
+            bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.018),transparent_55%)]
+          "
+        />
+
+        {/* Subtle Vignette */}
+        <div
+          className="
+            absolute
+            inset-0
+            bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.22)_100%)]
+          "
+        />
       </div>
 
       {/* Main */}
@@ -109,7 +146,7 @@ const AuthLayout = () => {
           }}
           className="shrink-0 px-6 pb-4 pt-2 text-center sm:pb-6"
         >
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/25">
             © {new Date().getFullYear()} Finora. All rights reserved.
           </p>
         </motion.footer>

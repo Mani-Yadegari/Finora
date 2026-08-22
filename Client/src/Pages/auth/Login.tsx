@@ -21,7 +21,18 @@ const Login = () => {
       </div>
 
       {/* Card */}
-      <div className="rounded-3xl border border-white/[0.07] bg-white/[0.025] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl sm:p-7">
+      <div
+        className="
+          rounded-3xl
+          border
+          border-white/[0.07]
+          bg-white/[0.025]
+          p-6
+          shadow-[0_20px_80px_rgba(0,0,0,0.35)]
+          backdrop-blur-2xl
+          sm:p-7
+        "
+      >
         <form className="space-y-5">
           {/* Email */}
           <div>
@@ -36,7 +47,17 @@ const Login = () => {
               <Mail
                 size={18}
                 strokeWidth={1.8}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/25 transition-colors duration-200 group-focus-within:text-emerald-400/70"
+                className="
+                  pointer-events-none
+                  absolute
+                  left-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-white/25
+                  transition-colors
+                  duration-200
+                  group-focus-within:text-[var(--primary)]
+                "
               />
 
               <input
@@ -45,7 +66,26 @@ const Login = () => {
                 type="email"
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="h-12 w-full rounded-2xl border border-white/[0.08] bg-black/20 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/20 transition-all duration-200 focus:border-emerald-400/30 focus:bg-emerald-400/[0.025] focus:ring-4 focus:ring-emerald-400/[0.05]"
+                className="
+                  h-12
+                  w-full
+                  rounded-2xl
+                  border
+                  border-white/[0.08]
+                  bg-black/20
+                  pl-11
+                  pr-4
+                  text-sm
+                  text-white
+                  outline-none
+                  placeholder:text-white/20
+                  transition-all
+                  duration-200
+                  focus:border-[var(--primary)]/30
+                  focus:bg-[var(--primary)]/[0.02]
+                  focus:ring-4
+                  focus:ring-[var(--primary)]/[0.045]
+                "
               />
             </div>
           </div>
@@ -62,7 +102,14 @@ const Login = () => {
 
               <button
                 type="button"
-                className="text-xs font-medium text-emerald-400/70 transition-colors duration-200 hover:text-emerald-400"
+                className="
+                  text-xs
+                  font-medium
+                  text-[var(--primary)]/70
+                  transition-colors
+                  duration-200
+                  hover:text-[var(--primary)]
+                "
               >
                 Forgot password?
               </button>
@@ -72,7 +119,17 @@ const Login = () => {
               <LockKeyhole
                 size={18}
                 strokeWidth={1.8}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/25 transition-colors duration-200 group-focus-within:text-emerald-400/70"
+                className="
+                  pointer-events-none
+                  absolute
+                  left-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-white/25
+                  transition-colors
+                  duration-200
+                  group-focus-within:text-[var(--primary)]
+                "
               />
 
               <input
@@ -81,14 +138,49 @@ const Login = () => {
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="Enter your password"
-                className="h-12 w-full rounded-2xl border border-white/[0.08] bg-black/20 pl-11 pr-12 text-sm text-white outline-none placeholder:text-white/20 transition-all duration-200 focus:border-emerald-400/30 focus:bg-emerald-400/[0.025] focus:ring-4 focus:ring-emerald-400/[0.05]"
+                className="
+                  h-12
+                  w-full
+                  rounded-2xl
+                  border
+                  border-white/[0.08]
+                  bg-black/20
+                  pl-11
+                  pr-12
+                  text-sm
+                  text-white
+                  outline-none
+                  placeholder:text-white/20
+                  transition-all
+                  duration-200
+                  focus:border-[var(--primary)]/30
+                  focus:bg-[var(--primary)]/[0.02]
+                  focus:ring-4
+                  focus:ring-[var(--primary)]/[0.045]
+                "
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-xl text-white/25 transition-all duration-200 hover:bg-white/[0.05] hover:text-white/60"
+                className="
+                  absolute
+                  right-3
+                  top-1/2
+                  flex
+                  h-8
+                  w-8
+                  -translate-y-1/2
+                  items-center
+                  justify-center
+                  rounded-xl
+                  text-white/25
+                  transition-all
+                  duration-200
+                  hover:bg-white/[0.05]
+                  hover:text-white/60
+                "
               >
                 {showPassword ? (
                   <EyeOff size={17} strokeWidth={1.8} />
@@ -109,17 +201,33 @@ const Login = () => {
             />
 
             <span
-              className={`flex h-4 w-4 items-center justify-center rounded-[5px] border transition-all duration-200 ${
-                rememberMe
-                  ? "border-emerald-400/40 bg-emerald-400/15"
-                  : "border-white/10 bg-white/[0.025]"
-              }`}
+              className={`
+                flex
+                h-4
+                w-4
+                items-center
+                justify-center
+                rounded-[5px]
+                border
+                transition-all
+                duration-200
+                ${
+                  rememberMe
+                    ? "border-[var(--primary)]/40 bg-[var(--primary)]/15"
+                    : "border-white/10 bg-white/[0.025]"
+                }
+              `}
             >
               <svg
                 viewBox="0 0 12 12"
-                className={`h-3 w-3 text-emerald-400 transition-all duration-200 ${
-                  rememberMe ? "scale-100 opacity-100" : "scale-50 opacity-0"
-                }`}
+                className={`
+                  h-3
+                  w-3
+                  text-[var(--primary)]
+                  transition-all
+                  duration-200
+                  ${rememberMe ? "scale-100 opacity-100" : "scale-50 opacity-0"}
+                `}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -132,7 +240,15 @@ const Login = () => {
               </svg>
             </span>
 
-            <span className="text-xs text-white/40 transition-colors duration-200 group-hover:text-white/55">
+            <span
+              className="
+                text-xs
+                text-white/40
+                transition-colors
+                duration-200
+                group-hover:text-white/55
+              "
+            >
               Remember me
             </span>
           </label>
@@ -142,17 +258,53 @@ const Login = () => {
             type="submit"
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.985 }}
-            className="group relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-emerald-500 text-sm font-semibold text-black shadow-[0_8px_30px_rgba(16,185,129,0.12)] transition-shadow duration-300 hover:shadow-[0_10px_35px_rgba(16,185,129,0.2)]"
+            className="
+              group
+              relative
+              flex
+              h-12
+              w-full
+              items-center
+              justify-center
+              gap-2
+              overflow-hidden
+              rounded-2xl
+              bg-[var(--primary)]
+              text-sm
+              font-semibold
+              text-black
+              shadow-[0_8px_30px_rgba(34,197,94,0.10)]
+              transition-all
+              duration-300
+              hover:bg-[var(--primary-hover)]
+              hover:shadow-[0_10px_35px_rgba(34,197,94,0.16)]
+            "
           >
             <span className="relative z-10">Sign in</span>
 
             <ArrowRight
               size={17}
               strokeWidth={2}
-              className="relative z-10 transition-transform duration-200 group-hover:translate-x-0.5"
+              className="
+                relative
+                z-10
+                transition-transform
+                duration-200
+                group-hover:translate-x-0.5
+              "
             />
 
-            <span className="absolute inset-0 -translate-x-full bg-white/10 transition-transform duration-500 group-hover:translate-x-0" />
+            <span
+              className="
+                absolute
+                inset-0
+                -translate-x-full
+                bg-white/10
+                transition-transform
+                duration-500
+                group-hover:translate-x-0
+              "
+            />
           </motion.button>
         </form>
 
@@ -172,7 +324,26 @@ const Login = () => {
           type="button"
           whileHover={{ y: -1 }}
           whileTap={{ scale: 0.985 }}
-          className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.025] text-sm font-medium text-white/70 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.045] hover:text-white"
+          className="
+            flex
+            h-12
+            w-full
+            items-center
+            justify-center
+            gap-3
+            rounded-2xl
+            border
+            border-white/[0.08]
+            bg-white/[0.025]
+            text-sm
+            font-medium
+            text-white/70
+            transition-all
+            duration-200
+            hover:border-white/[0.12]
+            hover:bg-white/[0.045]
+            hover:text-white
+          "
         >
           <span className="flex h-5 w-5 items-center justify-center text-sm font-semibold">
             G
@@ -186,7 +357,13 @@ const Login = () => {
         <span className="text-white/30">Don't have an account?</span>{" "}
         <Link
           to="/signup"
-          className="font-medium text-emerald-400/80 transition-colors duration-200 hover:text-emerald-400"
+          className="
+            font-medium
+            text-[var(--primary)]/80
+            transition-colors
+            duration-200
+            hover:text-[var(--primary)]
+          "
         >
           Sign up
         </Link>
